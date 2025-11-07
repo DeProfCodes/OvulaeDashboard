@@ -115,7 +115,7 @@ namespace OvulaeDashboard.Controllers
                     logEntry.DoctorsNotes = updateDrNotesDTO.Notes;
                     logEntry.DoctorResponseTime = DateTime.Now;
 
-                    result = await _moduleLogsApi.UpdatePregnancyLogEntry(updateDrNotesDTO.PatientUserId, logEntry);
+                    result = await _moduleLogsApi.UpdatePregnancyLogEntryDR(updateDrNotesDTO.PatientUserId, logEntry);
                     success = result.Success;
                 }
                 else if (updateDrNotesDTO.ModuleType == ModuleType.PeriodTracker)
@@ -127,7 +127,7 @@ namespace OvulaeDashboard.Controllers
                     logEntry.DoctorsNotes = updateDrNotesDTO.Notes;
                     logEntry.DoctorResponseTime = DateTime.Now;
 
-                    result = await _moduleLogsApi.UpdatePeriodLogEntry(updateDrNotesDTO.PatientUserId, logEntry);
+                    result = await _moduleLogsApi.UpdatePeriodLogEntryDR(updateDrNotesDTO.PatientUserId, logEntry);
                     success = result.Success;
                 }
                 else if (updateDrNotesDTO.ModuleType == ModuleType.MenopauseTracker)
@@ -139,7 +139,7 @@ namespace OvulaeDashboard.Controllers
                     logEntry.DoctorsNotes = updateDrNotesDTO.Notes;
                     logEntry.DoctorResponseTime = DateTime.Now;
 
-                    result = await _moduleLogsApi.UpdateMenopauseLogEntry(updateDrNotesDTO.PatientUserId, logEntry);
+                    result = await _moduleLogsApi.UpdateMenopauseLogEntryDR(updateDrNotesDTO.PatientUserId, logEntry);
                     success = result.Success;
                 }
                 else if (updateDrNotesDTO.ModuleType == ModuleType.Ovulation)
@@ -151,7 +151,7 @@ namespace OvulaeDashboard.Controllers
                     logEntry.DoctorsNotes = updateDrNotesDTO.Notes;
                     logEntry.DoctorResponseTime = DateTime.Now;
 
-                    result = await _moduleLogsApi.UpdateOvulationLogEntry(updateDrNotesDTO.PatientUserId, logEntry);
+                    result = await _moduleLogsApi.UpdateOvulationLogEntryDR(updateDrNotesDTO.PatientUserId, logEntry);
                     success = result.Success;
                 }
 
