@@ -1,0 +1,233 @@
+﻿@{
+    ViewData["Title"] = "Join Ovulae Portal";
+    Layout = "_DashboardLayout";
+}
+
+<link rel="stylesheet" href="~/css/app/account.css" />
+
+<div class="login-wrapper px-4">
+    <div class="login-card">
+
+        <!-- Logo -->
+        <div class="text-center mb-3 cursor-pointer" onclick="HomePage()">
+            <img src="~/images/logos/logo_main.webp" alt="Logo" style="height: 100px;" />
+        </div>
+
+        <!-- Title -->
+        <h4 class="text-center mb-3 mt-3 text-theme-clr-main">Create Your Ovulae Account</h4>
+
+        <!-- Error -->
+        <p class="error-message text-center fw-bold" id="RegistrationError"></p>
+
+        <!-- Register Form -->
+        <div class="register-form" id="RegistrationForm">
+            <div class="mb-3">
+                <input class="form-control" type="email" placeholder="Email address" id="Email">
+                <p class="error-message" id="EmailError"></p>
+            </div>
+
+            <div class="row mb-3" id="FullnameContainer">
+                <div class="col-md-6">
+                    <input class="form-control" type="text" placeholder="Firstname" id="Firstname">
+                    <p class="error-message" id="FirstnameError"></p>
+                </div>
+                <div class="col-md-6">
+                    <input class="form-control" type="text" placeholder="Lastname" id="Lastname">
+                    <p class="error-message" id="LastnameError"></p>
+                </div>
+            </div>
+
+            <div class="mb-3" id="PhoneNumberContainer">
+                <div class="input-group">
+                    <button class="btn bg-theme-clr-main text-white dropdown-toggle d-flex align-items-center" type="button" id="countryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img id="selectedFlag" src="https://flagcdn.com/w40/za.png" alt="ZA" style="width: 20px; height: 14px;" />
+                        <span id="selectedCode" class="ms-2">+27</span>
+                    </button>
+                    <ul class="dropdown-menu text-white" id="countryList"></ul>
+                    <input class="form-control" type="number" id="PhoneNumber" placeholder="Phone Number" />
+                </div>
+                <p class="text-danger small d-none" id="PhoneNumberError">Invalid phone number</p>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <div class="d-flex">
+                    <input class="form-control" id="psw-input" type="password" placeholder="New Password" onkeyup="CheckPasswordStrength()">
+                    <div class="password-visibility" style="margin-left:-30px; margin-top: 5px;">
+                        <i class="bi bi-eye pass-eye fs-20" onclick="TogglePasswordMask()"></i>
+                    </div>
+                </div>
+                <p class="error-message" id="PasswordError"></p>
+                <div class="progress mt-1" style="height: 5px;">
+                    <div id="passwordStrengthBar" class="progress-bar bg-danger" style="width: 0%;"></div>
+                </div>
+                <ul id="PasswordStrengthCriteria" class="list-unstyled text-muted mt-2">
+                    <li id="minLength" class="strength-item">At least 8 characters</li>
+                    <li id="numberCheck" class="strength-item">Contains a number</li>
+                    <li id="uppercaseCheck" class="strength-item">Contains an uppercase letter</li>
+                    <li id="lowercaseCheck" class="strength-item">Contains a lowercase letter</li>
+                    <li id="specialCharCheck" class="strength-item">Contains a special character</li>
+                </ul>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <div class="d-flex">
+                    <input class="form-control" id="psw-input-2" type="password" placeholder="Confirm Password">
+                    <div class="password-visibility" style="margin-left:-30px; margin-top: 5px;">
+                        <i class="bi bi-eye pass-eye fs-20" onclick="TogglePasswordMask()"></i>
+                    </div>
+                </div>
+                <p class="error-message" id="PasswordConfError"></p>
+            </div>
+
+            <!-- Register Button -->
+            <button type="submit" class="btn btn-theme-clr-main w-100 mt-3" onclick="Register()">Register</button>
+
+            <!-- Meta Links -->
+            <div class="text-center mt-3 fs-14">
+                <p class="mb-0">
+                    Already have an account?
+                    <a asp-action="Login" asp-controller="Authentication" class="text-theme-clr-2 fw-semibold text-decoration-none">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/js/custom/countriesPhones.js"></script>
+<script>
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        HideShowElement("#PreLoaderModal", HideShow.HIDE);
+        HideShowElement("#PreLoaderModalBackdrop", HideShow.HIDE);
+    });
+
+    $("#PhoneNumber").on("input", function () 
+    {
+        var value = $(this).val();
+        if (value.startsWith("0")) {
+            $(this).val(value.replace(/^0+/, ''));
+            $("#PhoneNumberError").removeClass("d-none").text("Number should not start with 0");
+        } else {
+            $("#PhoneNumberError").addClass("d-none");
+        }
+    });
+
+    function ValidateRegisterInputs(email, firstname, lastname, password, confirmPassword)
+    {
+        $("#Email").removeClass("invalid-input-box");
+        $("#Firstname").removeClass("invalid-input-box");
+        $("#Lastname").removeClass("invalid-input-box");
+        $("#PhoneNumberContainer").removeClass("invalid-input-box");
+        $("#psw-input-2").removeClass("invalid-input-box");
+        $("#psw-input").removeClass("invalid-input-box");
+
+        $("#EmailError").text("");
+        $("#FirstnameError").text("");
+        $("#LastnameError").text("");
+        $("#PasswordConfError").text("");
+        $("#PolicyError").text("");
+
+        var success = true;
+
+        if (!CheckEmail(email))
+        {
+            $("#EmailError").text("Enter valid email");
+            $("#Email").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(firstname))
+        {
+            $("#FirstnameError").text("Enter Firstname");
+            $("#Firstname").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(lastname))
+        {
+            $("#LastnameError").text("Enter Lastname");
+            $("#Lastname").addClass("invalid-input-box");
+            success = false;
+        }
+        if (!ValidatePhoneNumber())
+        {
+            $("#PhoneNumberContainer").addClass("invalid-input-box");
+            success = false;
+        }
+        if (password != confirmPassword)
+        {
+            $("#PasswordConfError").text("Passwords do not match!");
+            $("#psw-input-2").addClass("invalid-input-box");
+            success = false;
+        }
+        if (!CheckPasswordStrength())
+        {
+            $("#psw-input").addClass("invalid-input-box");
+            success = false;
+        }
+        /*
+        if (!IsCheckboxChecked("checkedCheckbox"))
+        {
+            alert('ok2');
+            $("#PolicyError").text("Please accept terms.");
+            success = false;
+        }
+        */
+        return success;
+    }
+
+    function Register()
+    {
+        var email = $("#Email").val();
+        var firstname = $("#Firstname").val();
+        var lastname = $("#Lastname").val();
+        var phoneNumber = $("#PhoneNumber").val();
+        var password = $("#psw-input").val();
+        var confirmPassword = $("#psw-input-2").val();
+
+        var isValid = ValidateRegisterInputs(email, firstname, lastname, password, confirmPassword);
+
+        if (!isValid)
+            return;
+
+        var url = "@Url.Action("Register", "Authentication")";
+        var payload =
+        {
+            Email: email,
+            Firstname: firstname,
+            Lastname: lastname,
+            PhoneNumber: phoneNumber,
+            Password: password,
+            CountryCode: $("#selectedCode").text(),
+            MobileDevice: "Unknown",
+        };
+
+        ShowAppLoader("Regstering...");
+
+        PerformAction(url, "POST", payload, RegisterCallback);
+    }
+
+    function RegisterCallback(success, response)
+    {
+        HideAppLoader();
+        if (success)
+        {
+            ShowAlertModal('Registered', 'Your account was successfully created, proceed to login', '@AlertModalIconType.Success').then(function (yes)
+            {
+                window.location = "@Url.Action("PendingApproval", "Authentication")";
+            });
+        }
+        else
+        {
+            ShowAlertModal('Error', response.responseJSON.error, '@AlertModalIconType.Error')
+            $("#RegistrationError").text(`*${response.responseJSON.error}`);
+        }
+    }
+
+</script>

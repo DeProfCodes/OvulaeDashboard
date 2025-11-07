@@ -1,0 +1,367 @@
+﻿
+.hidden
+{
+    display: none !important;
+}
+.invisible
+{
+    visibility: hidden !important;
+}
+.text-upper
+{
+    text-transform: uppercase !important;
+}
+/**========================= Alignments =======================*/
+.fl-right
+{
+    float:right !important;
+}
+.fl-left
+{
+    float:left !important;
+}
+.w-fit-content
+{
+    width: fit-content !important;
+}
+.w-max-content
+{
+    width: max-content !important;
+}
+.h-fit-content
+{
+    height: fit-content !important;
+}
+
+.actionButtonBusy
+{
+    cursor: not-allowed !important;
+    pointer-events: visible !important;
+    opacity: 0.7;
+}
+
+.actionButtonBusy:hover
+{
+    background-color: var(--theme-clr) !important;
+}
+
+.bg-silver
+{
+    background-color: silver !important;
+}
+.bg-lime
+{
+    background-color: lime !important;
+}
+.bg-red
+{
+    background-color: red !important;
+}
+.bg-yellow
+{
+    background-color: yellow !important;
+}
+.text-navy
+{
+    color: navy !important;
+}
+.text-gray
+{
+    color: gray !important;
+}
+.text-maroon
+{
+    color: maroon !important;
+}
+.text-darkgreen
+{
+    color: darkgreen !important;
+}
+.text-redish
+{
+    color: #ff444f !important;
+}
+.strength-item
+{
+    font-size: 11px;
+    list-style: square;
+    margin-left: 20px;
+    margin-bottom: -2px;
+}
+.text-capitalize
+{
+    text-transform: capitalize !important;
+}
+.no-transform
+{
+    text-transform: none !important;
+}
+/* ======================================================= Sizes =======================================================*/
+.w-50p
+{
+    width: 50px !important;
+}
+.w-75p
+{
+    width: 75px !important;
+}
+.w-100p
+{
+    width: 100px !important;
+}
+.w-125p
+{
+    width: 125px !important;
+}
+.w-150p
+{
+    width: 150px !important;
+}
+.w-180p
+{
+    width: 180px !important;
+}
+.w-200p
+{
+    width: 200px !important;
+}
+.w-225p
+{
+    width: 225px !important;
+}
+.w-250p
+{
+    width: 250px !important;
+}
+.w-300p
+{
+    width: 300px !important;
+}
+.w-350p
+{
+    width: 350px !important;
+}
+.w-400p
+{
+    width: 400px !important;
+}
+.w-450p
+{
+    width: 450px !important;
+}
+.w-500p
+{
+    width: 500px !important;
+}
+.w-600p
+{
+    width: 600px !important;
+}
+
+.w-10
+{
+    width: 10% !important;
+}
+.w-15
+{
+    width: 15% !important;
+}
+.w-20
+{
+    width: 20% !important;
+}
+.w-25
+{
+    width: 25% !important;
+}
+.w-30
+{
+    width: 30% !important;
+}
+.w-40
+{
+    width: 40% !important;
+}
+.w-50s
+{
+    width: 50% !important;
+}
+.w-60
+{
+    width: 60% !important;
+}
+.w-70
+{
+    width: 70% !important;
+}
+.w-80
+{
+    width: 80% !important;
+}
+.w-90
+{
+    width: 90% !important;
+}
+/*============================  heights ==================*/
+.h-20p
+{
+    height: 20px !important;
+}
+.h-25p
+{
+    height: 25px !important;
+}
+.h-30p
+{
+    height: 30px !important;
+}
+.h-40p
+{
+    height: 40px !important;
+}
+
+/* ======================================================= Texts =======================================================*/
+.fs-10
+{
+    font-size: 10px !important;
+}
+.fs-11
+{
+    font-size: 11px !important;
+}
+.fs-12
+{
+    font-size: 12px !important;
+}
+.fs-13
+{
+    font-size: 13px !important;
+}
+.fs-14
+{
+    font-size: 14px !important;
+}
+.fs-15
+{
+    font-size: 15px !important;
+}
+.fs-16
+{
+    font-size: 16px !important;
+}
+.fs-17
+{
+    font-size: 17px !important;
+}
+.fs-18
+{
+    font-size: 18px !important;
+}
+.fs-19
+{
+    font-size: 19px !important;
+}
+.fs-20
+{
+    font-size: 20px !important;
+}
+.fs-25
+{
+    font-size: 25px !important;
+}
+.fs-30
+{
+    font-size: 30px !important;
+}
+.fs-35
+{
+    font-size: 35px !important;
+}
+.fs-40
+{
+    font-size: 40px !important;
+}
+.fs-45
+{
+    font-size: 45px !important;
+}
+.fs-50
+{
+    font-size: 50px !important;
+}
+.fs-dynamic-small
+{
+    font-size:12px;
+}
+.fs-dynamic-normal
+{
+    font-size: 14px;
+}
+.fs-dynamic-medium-1
+{
+    font-size: 16px;
+}
+.fs-dynamic-medium-2
+{
+    font-size: 18px;
+}
+.fs-dynamic-large-1
+{
+    font-size: 20px;
+}
+.fs-dynamic-large-2
+{
+    font-size: 25px;
+}
+.fs-dynamic-large-3
+{
+    font-size: 30px;
+}
+/*=================================================================================================================*/
+.text-silver
+{
+    color: silver !important;
+}
+.text-blue
+{
+    color: blue !important;
+}
+.cursor-pointer
+{
+    cursor: pointer !important;
+}
+
+/**======================================================= Scaling ====================================================*/
+
+@media screen and (max-width:767px)
+{
+    
+}
+
+@media screen and (max-width:415px)
+{
+    .fs-dynamic-small
+    {
+        font-size: 10px;
+    }
+    .fs-dynamic-normal
+    {
+        font-size: 12px;
+    }
+    .fs-dynamic-medium-1
+    {
+        font-size: 13px;
+    }
+    .fs-dynamic-medium-2
+    {
+        font-size: 15px;
+    }
+    .fs-dynamic-large-1
+    {
+        font-size: 16px;
+    }
+    .fs-dynamic-large-3
+    {
+        font-size: 20px;
+    }
+}

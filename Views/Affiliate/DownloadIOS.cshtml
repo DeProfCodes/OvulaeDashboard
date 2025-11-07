@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Download Ovulae IOS";
+    Layout = "_DashboardLayout";
+}
+
+<link rel="stylesheet" href="~/css/app/account.css" />
+
+
+<div class="login-wrapper px-4 d-block">
+    <div class="text-center mb-3 cursor-pointer">
+        <img src="~/images/logos/logo_main.webp" alt="Logo" style="height: 100px; margin-top:30px;margin-bottom:30px;" />
+    </div>
+    <div class="login-card">
+        <div class="">
+            <div class="text-center mb-3 ">
+                <img src="~/images/other_icons/app_store_icon.png" alt="Logo" style="height: 40px;" />
+            </div>
+            <h4 class="text-center mt-3 fs-16 text-theme-clr-main">You are bring redirected to App Store to download the app</h4>
+        </div>
+        <div class="text-center mt-4 mb-3 cursor-pointer d-flex">
+            <img src="~/images/other_icons/ovulae_app_icon.png" alt="Logo" style="height: 30px;" />
+			<h5 class="ms-2 align-self-center">Ovulae</h5>
+            <p class="text-muted fst-italic ms-1 fs-12" style="margin-top:6px">(version 1.0.7)</p>
+        </div>
+        <button type="submit" class="btn btn-theme-clr-main w-100" id="copy"><i class="bi bi-cloud-arrow-down me-2"></i>Download Ovulae App</button>
+    </div>
+</div>
+
+<script>
+
+    const p = new URLSearchParams(location.search);
+    const ref = p.get('refCode') || p.get('ref');
+    document.getElementById('code').textContent = ref || '(none)';
+    
+    document.getElementById('copy').onclick = async () => 
+    {
+        if (!ref) return;
+        
+        try 
+        {
+            await navigator.clipboard.writeText(`ovulae-ref:${ref}`);
+            //alert('Referral code copied. Install the app, then open it.');
+            location.href = "https://apps.apple.com/app/id6751113242";
+        } 
+        catch 
+        { 
+            //alert('Copy failed — please copy manually.'); 
+        }
+    };
+
+</script>

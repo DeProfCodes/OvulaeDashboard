@@ -1,0 +1,152 @@
+﻿@using OvulaeDashboard.ViewModels.Admin
+
+@model List<UserDoctorPatientDetailsViewModel>
+
+@{
+    var planNames = new List<string>();//Model.Select(x => x.PlanName).Distinct().ToList();
+    var index = 1;
+}
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-people-fill",
+                PageType = AppPageType.PremiumUsers
+            });
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css" />
+
+
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="text-primary">Premium Users</h5>
+        </div>
+
+        <div class="p-0 card-body">
+            <div class="app-scroll table-responsive app-datatable-default">
+                <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">                   
+                    <table id="PremiumUsers" class="w-100 display default-data-table align-middle table">
+                        <thead>
+                            <tr>
+                                <th class="text-start w-20">Fullname</th>
+                                <th class="text-center w-20">Join Date</th>
+                                <th class="text-center w-20">Status</th>
+                                <th class="text-center w-20">Join Date</th>
+                                <th class="w-20">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="fs-12">
+                            @foreach (var user in Model)
+                            {
+                                var rowCss = (index++ % 2) == 0 ? "even" : "odd";
+                                var subscriptionBadge = HtmlCssHelper.GetBadgeCssForStatus(user.SubscriptionStatus);
+                                
+                                <tr class="@rowCss">
+                                    <td class="table-td text-start w-20">@user.FullName</td>
+                                    <td class="table-td text-center w-20">@user.JoinDate</td>
+                                    <td class="table-td text-center w-20"><span class="badge text-light-@subscriptionBadge">@user.SubscriptionStatus.GetDisplayName()</span></td>
+                                    <td class="table-td text-center w-20">@user.SubscriptionJoinDate</td>
+                                    <td class="w-20">
+                                        <button class="btn btn-sm btn-theme-clr-2" onclick="NavigateToPage('@AppPageType.DoctorsPatientDetails', '@user.UserId')">View Details</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Dashboard/AddOrEditUser.cshtml");
+}
+
+<script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+<script>
+
+    var planNameFilter = "";
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        PlanNameFilterText();
+        MobileScreenUpdates();
+
+        if ($('#PremiumUsers').length)
+        {
+            // Custom filter logic
+            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex)
+            {
+                if (!planNameFilter) return true;
+
+                const planNameColumnIndex = 0;
+                const planName = data[planNameColumnIndex] || "";
+                return planName.toLowerCase().includes(planNameFilter.toLowerCase());
+            });
+
+            PremiumUsersDT = $('#PremiumUsers').DataTable(
+            {
+                pagingType: 'simple_numbers',
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                select: {
+                    style: 'single' // or 'multi' if you want multiple row selection
+                },
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        previous: "Previous",
+                        next: "Next"
+                    }
+                }
+            });
+        }
+    });
+
+    function FilterAllResultsByPlanName()
+    {
+        var name= $("#FilterReturnsByName").val();
+
+        planNameFilter = name;
+        if (PremiumUsersDT)
+        {
+            PremiumUsersDT.draw();
+        }
+    }
+
+    $(window).on("resize", function ()
+    {
+        PlanNameFilterText();
+    });
+
+    function PlanNameFilterText()
+    {
+        if ($(window).width() <= 768)
+        {
+            $("#FilterReturnsByNameTitle").text("Plan Name:");
+        }
+        else
+        {
+            $("#FilterReturnsByNameTitle").text("Filter By Plan Name:");
+        }
+    }
+
+    function AddNewUserModal()
+    {
+        OpenUserModal("", "", "", 2, "").then(function (okay)
+        {
+            if(okay)
+            {
+
+            }
+        });
+    }
+
+</script>

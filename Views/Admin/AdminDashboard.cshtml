@@ -1,0 +1,617 @@
+﻿@using OvulaeDashboard.ViewModels.Shared
+@model AdminDashViewModel
+
+@{
+	ViewData["Title"] = "Admin Dashboard";
+}
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
+
+<section class="py-2">
+	<div class="row g-3">
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100 card-btn" style="background: var(--theme-clr-main);" onclick="NavigateToPage('@AppPageType.PremiumUsers')">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-people fs-3"></i></div>
+						<span class="badge bg-light text-dark">PREM</span>
+					</div>
+					<h6 class="fs-dynamic-medium-1">Premium Users</h6>
+					<h3 class="fw-bold fs-dynamic-large-3">@Model.PremiumUsers</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100 bg-success card-btn" onclick="NavigateToPage('@AppPageType.DoctorUsers')">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-heart-pulse fs-3"></i></div>
+						<span class="badge bg-light text-dark">DR</span>
+					</div>
+					<h6 class="fs-dynamic-medium-1">Doctors</h6>
+					<h3 class="fw-bold fs-dynamic-large-3">@Model.Doctors</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100 bg-warning card-btn" onclick="NavigateToPage('@AppPageType.AffiliateUsers')">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-megaphone fs-3"></i></div>
+						<span class="badge bg-light text-dark">AFF</span>
+					</div>
+					<h6 class="fs-dynamic-medium-1">Affiliates</h6>
+					<h3 class="fw-bold fs-dynamic-large-3">@Model.Affiliates</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100" style="background: var(--theme-clr-purple); color: #333; border-radius: 16px;">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-cash-coin fs-3 text-dark"></i></div>
+						<span class="badge bg-light text-white">$</span>
+					</div>
+					<h6 class="fs-dynamic-medium-1">Total Subscriptions</h6>
+					<h3 class="fw-bold fs-dynamic-large-3">@Model.TotalSubscriptionsAmount</h3>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<!-- LEFT COLUMN -->
+		<div class="card col-lg-5">
+			<div class="rounded py-3 px-3 h-100">
+
+				<!-- Horizontal Progress Bar (Top) -->
+				<div class="mb-4 text-center">
+					<h5 class="text-primary fw-bold mb-3 fs-dynamic-medium-2">📈 Monthly Subscriber Growth</h5>
+					<p class="mb-1 fs-dynamic-medium-1">This Month: <strong>@HtmlCssHelper.GetFormatedThousands(Model.ThisMonthSubscribers)</strong> new subscribers</p>
+
+					<span class="badge bg-theme-clr-3 mb-2">📈 +12% vs last month</span>
+					<div class="progress mt-2" style="height: 25px;">
+						<div class="progress-bar bg-theme-clr-2" role="progressbar" style="width: 28.5%" aria-valuenow="@Model.OverallSubscribers" aria-valuemin="0" aria-valuemax="@Model.NextSubscriptionLevel"></div>
+					</div>
+				</div>
+
+				<!-- Level Info + Chart -->
+				<div class="text-center mt-3">
+					<h6 class="text-uppercase text-muted fs-12 mb-0">Current Tier</h6>
+					<p class="fw-bold fs-dynamic-large-1 mb-1">Level @Model.CurrentSubscriptionLevel</p>
+					<small class="text-muted mb-2 d-block">0 to @Model.NextSubscriptionLevel Subscribers</small>
+
+					<canvas id="levelProgressChart" width="120" height="120" style="max-width: 180px; max-height: 180px" class="mx-auto"></canvas>
+					<p class="fs-13 mt-2 text-muted mb-0">Progress: <strong>@Model.OverallSubscribers</strong> / @Model.NextSubscriptionLevel</p>
+					<span class="badge bg-warning text-dark">🎯 @HtmlCssHelper.GetFormatedThousands(Model.OverallSubscribers) more to reach Level @(Model.CurrentSubscriptionLevel + 1)</span>
+				</div>
+
+				<!-- Divider -->
+				<hr class="my-4" />
+
+				@{
+					var subscriptionLevelImg = $"level_{Model.CurrentSubscriptionLevel}.png";
+				}
+				<!-- Badge and CTA -->
+				<div class="text-center">
+					<img src="~/images/subscribe/@subscriptionLevelImg" alt="Level Badge" style="height: 150px; object-fit: contain;" />
+					<p class="fs-13 text-muted mt-3 mb-1">📈 Unlock advanced admin tools at Level  @(Model.CurrentSubscriptionLevel + 1)</p>
+				</div>
+			</div>
+		</div>
+		<!-- RIGHT COLUMN -->
+		<div class="col-lg-7 h-100 ">
+			<div class="card">
+				<div class="rounded py-3 px-3 h-100">
+					<h5 class="text-primary fw-bold mb-3 fs-dynamic-medium-2">📊 Performance Overview</h5>
+
+					<!-- Filters -->
+					<div class="row g-2 mb-4">
+						<div class="col-md-6">
+							<select class="form-select form-select-sm" id="dateFilter">
+								<option value="today" selected>Today</option>
+								<option value="7">Last 7 Days</option>
+								<option value="30">Last 30 Days</option>
+								<option value="90">Last 3 Months</option>
+								<option value="365">Last Year</option>
+								<option value="all">All Time</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<select class="form-select form-select-sm" id="platformFilter">
+								<option value="all" selected>All Platforms</option>
+								<option value="android">Android</option>
+								<option value="ios">iOS</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- Doughnut + Bar Charts -->
+					<div class="row mb-4">
+						<div class="col-md-6">
+							<h6 class="text-muted fs-13 text-center mb-2">User Types</h6>
+							<canvas id="userTypeChart" height="180"></canvas>
+						</div>
+						<div class="col-md-6">
+							<h6 class="text-muted fs-13 text-center mb-2">Monthly Joins</h6>
+							<canvas id="monthlyJoinsChart" height="180"></canvas>
+						</div>
+					</div>
+
+					@{
+						var pgW100k = $"{(Model.OverallSubscribers < 100000 ? Math.Round((Model.OverallSubscribers / 100000.0) * 100, 2) : 100)}%".Replace(",",".");
+						var pgW250k = $"{(Model.OverallSubscribers < 250000 ? Math.Round((Model.OverallSubscribers / 250000.0) * 100, 2) : 100)}%".Replace(",", ".");
+						var pgW500k = $"{(Model.OverallSubscribers < 500000 ? Math.Round((Model.OverallSubscribers / 500000.0) * 100, 2) : 100)}%".Replace(",", ".");
+						var pgW750k = $"{(Model.OverallSubscribers < 750000 ? Math.Round((Model.OverallSubscribers / 750000.0) * 100, 2) : 100)}%".Replace(",", ".");
+						var pgW1m = $"{(Model.OverallSubscribers < 1000000 ? Math.Round((Model.OverallSubscribers / 1000000.0) * 100, 2) : 100)}%".Replace(",", ".");
+					}
+
+					<!-- Target Progress -->
+					<div class="mb-4">
+						<h6 class="text-uppercase text-muted fs-13">🎯 Growth Targets</h6>
+						<div class="mb-2">
+							<div class="d-flex justify-content-between">
+								<span>100K Target</span>
+								<small>@Model.OverallSubscribers / 100,000</small>
+							</div>
+							<div class="progress" style="height: 12px;">
+								<div class="progress-bar bg-theme-clr-2" style="width: @pgW100k"></div>
+							</div>
+						</div>
+						<div class="mb-2">
+							<div class="d-flex justify-content-between">
+								<span>250K Target</span>
+								<small>@Model.OverallSubscribers / 250,000</small>
+							</div>
+							<div class="progress" style="height: 12px;">
+								<div class="progress-bar bg-warning" style="width: @pgW250k"></div>
+							</div>
+						</div>
+						<div class="mb-2">
+							<div class="d-flex justify-content-between">
+								<span>500K Target</span>
+								<small>@Model.OverallSubscribers / 500,000</small>
+							</div>
+							<div class="progress" style="height: 12px;">
+								<div class="progress-bar bg-info" style="width: @pgW500k"></div>
+							</div>
+						</div>
+						<div class="mb-2">
+							<div class="d-flex justify-content-between">
+								<span>750K Target</span>
+								<small>@Model.OverallSubscribers / 750,000</small>
+							</div>
+							<div class="progress" style="height: 12px;">
+								<div class="progress-bar bg-theme-clr-2" style="width: @pgW750k"></div>
+							</div>
+						</div>
+						<div>
+							<div class="d-flex justify-content-between">
+								<span>1M Target</span>
+								<small>@Model.OverallSubscribers / 1,000,000</small>
+							</div>
+							<div class="progress" style="height: 12px;">
+								<div class="progress-bar bg-danger" style="width: @pgW1m"></div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Summary Badges -->
+					<div class="row g-3">
+				<div class="col-md-4">
+					<div class="bg-light p-3 text-center rounded border-start border-4 border-success shadow-sm h-100">
+						<h6 class="fs-13 text-muted mb-1">Premium Users</h6>
+								<h4 class="fw-bold text-success mb-0 fs-dynamic-large-1">@Model.PremiumUsers</h4>
+						<small>Active Now</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-light p-3 text-center rounded border-start border-4 border-primary shadow-sm h-100">
+						<h6 class="fs-13 text-muted mb-1">Total Subscriptions</h6>
+								<h4 class="fw-bold text-primary mb-0 fs-dynamic-large-1">@Model.TotalSubscriptionsAmount</h4>
+						<small>Revenue</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-light p-3 text-center rounded border-start border-4 border-danger shadow-sm h-100">
+						<h6 class="fs-13 text-muted mb-1">Net Revenue</h6>
+								<h4 class="fw-bold text-danger mb-0 fs-dynamic-large-1">@Model.NetRevenue</h4>
+						<small>After Commissions</small>
+					</div>
+				</div>
+			</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card mt-4">
+		<div class="card-body px-4 py-4">
+			<h5 class="text-primary fw-bold mb-4 fs-dynamic-medium-2">📊 Platform & Performance Insights</h5>
+
+			<!-- Section 1: Platform Overview -->
+			<div class="bg-light rounded-top px-3 py-2 mb-3">
+				<h6 class="text-uppercase text-muted fw-bold mb-0 fs-dynamic-medium-1">📱 User Distribution</h6>
+			</div>
+			<div class="row g-3 mb-4">
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-info">
+						<div class="d-flex">
+							<h6 class="text-muted fs-13 mb-1"><i class="bi bi-phone"></i> iOS Users</h6>
+							<img src="~/images/other_icons/apple_icon.png" class="ms-auto" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" />
+						</div>
+						<h4 class="fw-bold fs-dynamic-large-1">@Model.IOSUsers</h4>
+						<small class="text-muted">Via App Store</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-success">
+						<div class="d-flex">
+							<h6 class="text-muted fs-13 mb-1"><i class="bi bi-android2"></i> Android Users</h6>
+							<img src="~/images/other_icons/playstore.png" class="ms-auto" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" />
+						</div>
+						<h4 class="fw-bold fs-dynamic-large-1">@Model.AndroidUsers</h4>
+						<small class="text-muted">Via Play Store</small>
+					</div>
+				</div>
+				
+				@{
+					(var country, var code) = HtmlCssHelper.GetCountryAndFlag(Model.TopCountryCode);
+					code = $"{code}.png";
+				}
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-warning">
+						<h6 class="text-muted fs-13 mb-1">
+							<i class="bi bi-globe2 me-1"></i> Top Country
+						</h6>
+						<div class="d-flex">
+							<h4 class="fw-bold fs-dynamic-large-1">@country</h4>
+							<img src="https://flagcdn.com/16x12/@code" srcset="https://flagcdn.com/32x24/@code 2x,https://flagcdn.com/48x36/@code 3x" width="16" height="12" alt="@country" style="width: 25px;height: 20px;object-fit: contain;margin-left: 10px;margin-top: 5px;">
+						</div>
+						<small class="text-muted">Users: @Model.TopCountryUsers</small>
+					</div>
+				</div>
+			</div>
+
+			<!-- Section 2: Contributors -->
+			<div class="bg-light rounded-top px-3 py-2 mb-3">
+				<h6 class="text-uppercase text-muted fw-bold mb-0 fs-dynamic-medium-1">👥 Top Contributors</h6>
+			</div>
+			<div class="row g-3 mb-4">
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-primary">
+						<h6 class="text-muted fs-13 mb-1"><i class="bi bi-person-fill-up"></i> Top Affiliate</h6>
+						<h4 class="fw-bold fs-dynamic-large-1">@Model.TopAffiliateFullname</h4>
+						<small class="text-muted">@Model.TopAffiliateReferals Referrals</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-danger">
+						<h6 class="text-muted fs-13 mb-1"><i class="bi bi-person-vcard-fill"></i> Top Doctor</h6>
+						<h4 class="fw-bold fs-dynamic-large-1">@Model.TopDoctorName</h4>
+						<small class="text-muted">@Model.TopDoctorReferals Refered Patients</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-secondary">
+						<h6 class="text-muted fs-13 mb-1"><i class="bi bi-mouse"></i> Total Clicks</h6>
+						<h4 class="fw-bold fs-dynamic-large-1">@HtmlCssHelper.GetFormatedThousands(Model.TotalClicks)</h4>
+						<small class="text-muted">Across platforms</small>
+					</div>
+				</div>
+			</div>
+
+			<!-- Section 3: Financial Overview -->
+			<div class="bg-light rounded-top px-3 py-2 mb-3">
+				<h6 class="text-uppercase text-muted fw-bold mb-0 fs-dynamic-medium-1">💵 Revenue & Withdrawals</h6>
+			</div>
+			<div class="row g-3 mb-4">
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-dark">
+						<h6 class="text-muted fs-13 mb-1"><i class="bi bi-people"></i> Total Users</h6>
+						<h4 class="fw-bold fs-dynamic-large-1">@HtmlCssHelper.GetFormatedThousands(Model.TotalUsers)</h4>
+						<small class="text-muted">All Regions</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-success">
+						<h6 class="text-muted fs-13 mb-1"><i class="bi bi-cash"></i> Paid to Affiliates</h6>
+						<h4 class="fw-bold">@Model.TotalPaidToAffiliates</h4>
+						<small class="text-muted">All Time</small>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="bg-theme-clr-purple shadow-sm rounded p-3 border-start border-4 border-warning">
+						<h6 class="text-muted fs-13 mb-1"><i class="bi bi-hourglass-split"></i> Due to Affiliates</h6>
+						<h4 class="fw-bold fs-dynamic-large-1">@Model.TotalPendingPayouts</h4>
+						<small class="text-muted">Pending</small>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- New Activity Insights Card -->
+	<div class="card mt-4">
+		<div class="card-body px-4 py-4">
+			<h5 class="text-primary fw-bold mb-4 fs-dynamic-medium-2">🔍 Activity Insights</h5>
+			<div class="row g-4">
+				<!-- Left Column: Real-time & Trends -->
+				<div class="col-md-4">
+					<div class="bg-light rounded shadow-sm p-3 h-100 border-start border-4 border-primary">
+						<h6 class="text-muted fs-13 mb-2">Today</h6>
+						<p class="mb-1 fs-dynamic-normal">👥 New Users: <strong>@Model.TodayNewUsers</strong></p>
+						<p class="mb-1 fs-dynamic-normal">💳 Subscriptions: <strong>@Model.TodayNewSubscription</strong></p>
+						<p class="mb-1 fs-dynamic-normal">🔁 Affiliate Clicks: <strong>@Model.TodayTotalClicks</strong></p>
+						<hr class="my-2 fs-dynamic-normal">
+
+					</div>
+				</div>
+
+				<!-- Middle Column: Payouts & Milestones -->
+				<div class="col-md-4">
+					<div class="bg-light rounded shadow-sm p-3 h-100 border-start border-4 border-success">
+						<h6 class="text-muted fs-13 mb-2">💸 Payout Overview</h6>
+						<p class="mb-1 fs-dynamic-normal">Total Paid: <strong>@Model.TotalPaidToAffiliates)</strong></p>
+						<p class="mb-1 fs-dynamic-normal">Pending Payouts: <strong>@Model.TotalPendingPayouts)</strong></p>
+						<p class="mb-1 fs-dynamic-normal">Avg Payout (30d): <strong>0</strong></p>
+						<hr class="my-2">
+						<h6 class="text-muted fs-13 mb-1">🎯 Target Milestones</h6>
+						<p class="mb-0 fs-dynamic-normal">Current: <strong>@HtmlCssHelper.GetFormatedThousands(Model.OverallSubscribers)</strong> users</p>
+						<p class="fs-12 text-muted mb-0">Next:  @(Model.NextSubscriptionLevel/1000)K target</p>
+					</div>
+				</div>
+
+				<!-- Right Column: Top Locations / Access -->
+				<div class="col-md-4">
+					<div class="bg-light rounded shadow-sm p-3 h-100 border-start border-4 border-warning">
+						<h6 class="text-muted fs-13 mb-2">🌍 Regional Data</h6>
+						<p class="mb-1 fs-dynamic-normal">Top Country: <strong>@country</strong></p>
+						<p class="mb-1 fs-dynamic-normal">Total Countries: <strong>@Model.TotalCountries</strong></p>
+						<hr class="my-2">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</section>
+
+<script>
+	$(document).ready(function ()
+	{
+		HideAppLoader();
+
+		// Level Progress Doughnut Chart
+		new Chart(document.getElementById("levelProgressChart").getContext("2d"),
+		{
+			type: 'doughnut',
+			data:
+			{
+				labels: ["Current Subscribers", "Remaining"],
+				datasets:
+				[
+					{
+						data: [@Model.ThisMonthSubscribers, @(Model.NextSubscriptionLevel - Model.ThisMonthSubscribers)],
+						backgroundColor: ['#007bff', '#e9ecef'],
+						borderWidth: 6
+					}
+				]
+			},
+			options:
+			{
+				cutout: '70%',
+				responsive: true,
+				plugins:
+				{
+					legend: { display: false },
+					tooltip: { enabled: true },
+					datalabels: { display: false }
+				}
+			}
+		});
+
+		let userTypeChartInstance = null;
+		let monthlyJoinsChartInstance = null;
+
+		function renderCharts(days, platform)
+		{
+			if (userTypeChartInstance)
+			{
+				userTypeChartInstance.destroy();
+			}
+			if (monthlyJoinsChartInstance)
+			{
+				monthlyJoinsChartInstance.destroy();
+			}
+
+			let durationIndex;
+			if (days === "today")
+			{
+				durationIndex = 0;
+			}
+			else if (days === "7")
+			{
+				durationIndex = 1;
+			}
+			else if (days === "30")
+			{
+				durationIndex = 2;
+			}
+			else if (days === "90")
+			{
+				durationIndex = 3;
+			}
+			else if (days === "365" || days === "all")
+			{
+				durationIndex = 4;
+			}
+			else
+			{
+				durationIndex = 2; // fallback to Last Month
+			}
+
+			let joinsData;
+			if (durationIndex === 0)
+			{
+				joinsData = @Html.Raw(Json.Serialize(Model.NewJoinsAll[0] ?? new List<ChartViewModel> { new ChartViewModel { Label = "No Data", Value1 = 0, Value2 = 0 } }));
+			}
+			else if (durationIndex === 1)
+			{
+				joinsData = @Html.Raw(Json.Serialize(Model.NewJoinsAll[1] ?? new List<ChartViewModel> { new ChartViewModel { Label = "No Data", Value1 = 0, Value2 = 0 } }));
+			}
+			else if (durationIndex === 2)
+			{
+				joinsData = @Html.Raw(Json.Serialize(Model.NewJoinsAll[2] ?? new List<ChartViewModel> { new ChartViewModel { Label = "No Data", Value1 = 0, Value2 = 0 } }));
+			}
+			else if (durationIndex === 3)
+			{
+				joinsData = @Html.Raw(Json.Serialize(Model.NewJoinsAll[3] ?? new List<ChartViewModel> { new ChartViewModel { Label = "No Data", Value1 = 0, Value2 = 0 } }));
+			}
+			else if (durationIndex === 4)
+			{
+				joinsData = @Html.Raw(Json.Serialize(Model.NewJoinsAll[4] ?? new List<ChartViewModel> { new ChartViewModel { Label = "No Data", Value1 = 0, Value2 = 0 } }));
+			}
+			else
+			{
+				joinsData = [{ Label: "No Data", Value1: 0, Value2: 0 }];
+			}
+
+			const userTypesData = @Html.Raw(Json.Serialize(Model.UserTypes ?? new List<List<UserTypeChartViewModel>> {
+				new List<UserTypeChartViewModel> {
+					new UserTypeChartViewModel { Premium = 0, Affiliates = 0, Doctors = 0 },
+					new UserTypeChartViewModel { Premium = 0, Affiliates = 0, Doctors = 0 },
+					new UserTypeChartViewModel { Premium = 0, Affiliates = 0, Doctors = 0 }
+				}
+			}));
+
+			let userTypeData;
+			if (platform === "android")
+			{
+				userTypeData = [
+					userTypesData[durationIndex][0]?.Premium ?? 0,
+					userTypesData[durationIndex][0]?.Affiliates ?? 0,
+					userTypesData[durationIndex][0]?.Doctors ?? 0
+				];
+			}
+			else if (platform === "ios")
+			{
+				userTypeData = [
+					userTypesData[durationIndex][1]?.Premium ?? 0,
+					userTypesData[durationIndex][1]?.Affiliates ?? 0,
+					userTypesData[durationIndex][1]?.Doctors ?? 0
+				];
+			}
+			else
+			{
+				userTypeData = [
+					userTypesData[durationIndex][2]?.Premium ?? 0,
+					userTypesData[durationIndex][2]?.Affiliates ?? 0,
+					userTypesData[durationIndex][2]?.Doctors ?? 0
+				];
+			}
+
+			if (!Array.isArray(joinsData) || joinsData.length === 0)
+			{
+				joinsData = [{ Label: "No Data", Value1: 0, Value2: 0 }];
+			}
+
+			if (!Array.isArray(userTypeData) || userTypeData.reduce((a, b) => a + b, 0) === 0)
+			{
+				userTypeData = [1, 0, 0];
+			}
+
+			const labels = joinsData.map(x => x.Label);
+			const newJoins = joinsData.map(x => x.Value1);
+			const activeSubs = joinsData.map(x => x.Value2);
+
+			userTypeChartInstance = new Chart(document.getElementById("userTypeChart").getContext("2d"),
+			{
+				type: "doughnut",
+				data:
+				{
+					labels: ["Premium", "Affiliates", "Doctors"],
+					datasets:
+					[
+						{
+							data: userTypeData,
+							backgroundColor: ["#b5a4de", "#FFC107", "#AECD34"],
+							borderWidth: 2
+						}
+					]
+				},
+				options:
+				{
+					responsive: true,
+					cutout: "70%",
+					plugins:
+					{
+						legend: { display: false },
+						tooltip:
+						{
+							callbacks:
+							{
+								label: function (context)
+								{
+									return context.label + ": " + context.formattedValue;
+								}
+							}
+						}
+					}
+				}
+			});
+
+			monthlyJoinsChartInstance = new Chart(document.getElementById("monthlyJoinsChart").getContext("2d"),
+			{
+				type: "bar",
+				data:
+				{
+					labels: labels.length > 0 ? labels : ["No Data"],
+					datasets:
+					[
+						{
+							label: "New Joins",
+							data: newJoins.length > 0 ? newJoins : [0],
+							backgroundColor: "#6f42c1"
+						},
+						{
+							label: "Active Subscriptions",
+							data: activeSubs.length > 0 ? activeSubs : [0],
+							backgroundColor: "#20c997"
+						}
+					]
+				},
+				options:
+				{
+					responsive: true,
+					plugins:
+					{
+						legend: { display: true }
+					},
+					scales:
+					{
+						y: { beginAtZero: true }
+					}
+				}
+			});
+		}
+
+		// Initial Load
+		renderCharts($("#dateFilter").val(), $("#platformFilter").val());
+
+		// Filter Change
+		$("#dateFilter, #platformFilter").on("change", function ()
+		{
+			renderCharts($("#dateFilter").val(), $("#platformFilter").val());
+		});
+	});
+
+
+</script>

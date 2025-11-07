@@ -1,0 +1,386 @@
+﻿@model SettingsViewModel
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-gear-fill",
+                PageType = AppPageType.AccountSettings
+            });
+}
+
+<div class="row">
+    <!-- LEFT: Password Settings -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-primary">Change Password</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <button class="btn btn-primary" onclick="StartPasswordResetProcess()" id="PasswordResetButton">
+                        Request Password Change
+                    </button>
+                    <p class="fs-12 fst-italic text-muted mt-1">
+                        We'll send a reset code to your account email.
+                    </p>
+                </div>
+
+                <div id="PasswordChangeSection" class="hidden mt-4">
+                    <p class="fs-16 text-center mb-2">
+                        A code was sent to <span class="fw-bold text-warning" id="SettingsDestinationEmail">@Model.Email</span>
+                    </p>
+
+                    <div class="form-group mb-2">
+                        <label class="form-label">Security Code</label>
+                        <input type="text" id="ResetCode" class="form-control" placeholder="Enter 8-digit code" maxlength="8">
+                        <p class="error-message" id="ResetCodeError"></p>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label class="form-label">New Password</label>
+                        <input type="password" id="psw-input" class="form-control" onkeyup="CheckPasswordStrength()">
+                        <div class="mb-1" id="SettingsPasswordStrength"></div>
+                        <p class="error-message" id="SettingsPasswordError"></p>
+                    </div>
+                    <div class="mb-1 text-box" id="pswmeter" style="margin-top:3px"></div>
+                    <p class="error-message bg-white text-box" id="PasswordError" style="margin-top:0px;"></p>
+                    <div>
+                        <ul id="PasswordStrengthCriteria" class="list-unstyled text-muted mt-3">
+                            <li id="minLength" class="strength-item">At least 8 characters</li>
+                            <li id="numberCheck" class="strength-item">Contains a number</li>
+                            <li id="uppercaseCheck" class="strength-item">Contains an uppercase letter</li>
+                            <li id="lowercaseCheck" class="strength-item">Contains a lowercase letter</li>
+                            <li id="specialCharCheck" class="strength-item">Contains a special character</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group mb-3 mt-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" id="psw-input-2" class="form-control">
+                        <p class="error-message" id="PasswordConfError"></p>
+                    </div>
+
+                    <button class="btn btn-primary w-100" onclick="ChangePasswordCode()">Save Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Bank Settings -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-primary">Bank Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label">Bank Name</label>
+                    <select class="form-select" id="SettingsBankName" onchange="EditBankChangeBankName()">
+                        <option value="">Please select...</option>
+                        <option value="FNB">FNB</option>
+                        <option value="Capitec">Capitec</option>
+                        <option value="Standard Bank">Standard Bank</option>
+                        <option value="ABSA">ABSA</option>
+                        <option value="Nedbank">Nedbank</option>
+                        <option value="TymeBank">TymeBank</option>
+                        <option value="African Bank">African Bank</option>
+                        <option value="Investec">Investec</option>
+                        <option value="Bidvest Bank">Bidvest Bank</option>
+                    </select>
+                    <p class="error-message" id="SettingsBankNameError"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Branch Code</label>
+                    <input type="text" id="SettingsBranchCode" class="form-control" maxlength="10">
+                    <p class="error-message" id="SettingsBranchCodeError"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Account Type</label>
+                    <select class="form-select" id="SettingsAccountType">
+                        <option value="">Select Type</option>
+                        <option value="Savings">Savings</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Transmission">Transmission</option>
+                        <option value="Fixed">Fixed</option>
+                        <option value="Credit Card Account">Credit</option>
+                        <option value="Subscription">Subscription</option>
+                        <option value="Bond">Bond</option>
+                    </select>
+                    <p class="error-message" id="SettingsAccountTypeError"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Account Number</label>
+                    <input type="number" id="SettingsAccountNumber" class="form-control" maxlength="20">
+                    <p class="error-message" id="SettingsAccountNumberError"></p>
+                </div>
+
+                <button class="btn btn-primary w-100" onclick="SaveBankDetails()">Save Bank Details</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+
+        PreFillBankDetails();
+    });
+
+    function PreFillBankDetails()
+    {
+        $("#SettingsBankName").val("@Model.BankDetails.BankName");
+        $("#SettingsBranchCode").val("@Model.BankDetails.BranchCode");
+        $("#SettingsAccountType").val("@Model.BankDetails.AccountType");
+        $("#SettingsAccountNumber").val("@Model.BankDetails.AccountNumber");
+    }
+
+    function StartPasswordResetProcess()
+    {
+        ShowAlertModal(
+            'Password Reset',
+            `Are you sure you want to change your Login password?`,
+            '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            if(confirmed)
+            {
+                var email = "@Model.Email";
+                ShowAppLoader(`Sending Password Reset Code to your email: ${email}...`);
+
+                var url = "@Url.Action("RequestPasswordReset", "Account")";
+
+                PerformAction(url, "POST", null, AccountSettingsPasswordChangeCallback);
+            }
+        });
+    }
+
+    function AccountSettingsPasswordChangeCallback(success, response)
+    {
+        HideAppLoader();
+        if (success)
+        {
+            var email = "@Model.Email";
+            ShowAlertModal("Password Code Sent", `We have sent you password reset code into your email: ${email}`, "@AlertModalIconType.Success").then(function(okay)
+            {
+                HideShowElement("#PasswordChangeSection", HideShow.SHOW);
+                $("#PasswordResetButton").text("Send New Code");
+            });
+        }
+        else
+        {
+            ShowAlertModal("Error", `${response.responseJSON.error}`, "@AlertModalIconType.Error");
+        }
+    }
+
+    function ChangePasswordCode()
+    {
+        $("#ResetCodeError").text("");
+        $("#PasswordConfError").text("");
+
+        $("#ResetCode").removeClass("invalid-input-box");
+        $("#psw-input-2").removeClass("invalid-input-box");
+        $("#psw-input").removeClass("invalid-input-box");
+
+        var code = $("#ResetCode").val();
+        var password = $("#psw-input").val();
+        var confirmPassword = $("#psw-input-2").val();
+
+        var success = true;
+
+        if (StringNullOrEmpty(code))
+        {
+            $("#ResetCodeError").text("Enter code");
+            $("#ResetCode").addClass("invalid-input-box");
+            success = false;
+        }
+        if (password != confirmPassword)
+        {
+            $("#PasswordConfError").text("Passwords do not match!");
+            $("#psw-input-2").addClass("invalid-input-box");
+            success = false;
+        }
+        if (!CheckPasswordStrength())
+        {
+            $("#psw-input").addClass("invalid-input-box");
+            success = false;
+        }
+
+        if (!success) return;
+
+        SaveNewPassword(password, code);
+    }
+
+    function SaveNewPassword(password, code)
+    {
+        ShowAlertModal(
+            'Password Reset',
+            `Are you sure you want to change your Login password?`,
+            '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            if(confirmed)
+            {
+                ShowAppLoader(`Updating Account Password...`);
+
+                var url = "@Url.Action("PasswordResetCodeVerify", "Authentication")";
+
+                var payload =
+                {
+                    Email: "@Model.Email",
+                    Password: password,
+                    Code: code,
+                    CallerPage: "@AppPageType.AccountSettings"
+                };
+
+                PerformAction(url, "POST", payload, PasswordChangedCallback);
+            }
+        });
+    }
+
+    function PasswordChangedCallback(success, response)
+    {
+        HideAppLoader();
+        if (success)
+        {
+            ShowAlertModal("Password Reset Success", `Your password has been successfully changed.`, "@AlertModalIconType.Success").then(function(okay)
+            {
+                HideShowElement("#PasswordChangeSection", HideShow.HIDE);
+                $("#PasswordResetButton").text("Request Password Change");
+            });
+        }
+        else
+        {
+            ShowAlertModal("Error", `${response.responseJSON.error}`, "@AlertModalIconType.Error");
+        }
+    }
+
+    function EditBankChangeBankName()
+    {
+        $("#SettingsBankName").removeClass("invalid-input-box");
+        $("#SettingsBranchCode").removeClass("invalid-input-box");
+        $("#SettingsBankNameError").text("");
+        $("#SettingsBranchCodeError").text("");
+
+        var bankName = $("#SettingsBankName").val();
+        var branchCode = "";
+
+        if(bankName == "FNB") branchCode = "250655";
+        if(bankName == "Capitec") branchCode = "470010";
+        if(bankName == "Standard Bank") branchCode = "051001";
+        if(bankName == "ABSA") branchCode = "632005";
+        if(bankName == "Nedbank") branchCode = "198765";
+        if(bankName == "African Bank") branchCode = "430000";
+        if(bankName == "Bidvest Bank") branchCode = "462005";
+        if(bankName == "Investec Bank") branchCode = "580105";
+        if(bankName == "TymeBank") branchCode = "678910";
+
+        $("#SettingsBranchCode").val(branchCode);
+
+        ValidateBankDetailsFields2();
+    }
+
+    function ValidateBankDetailsFields2()
+    {
+        $("#SettingsBankName").removeClass("invalid-input-box");
+        $("#SettingsBranchCode").removeClass("invalid-input-box");
+        $("#SettingsAccountType").removeClass("invalid-input-box");
+        $("#SettingsAccountNumber").removeClass("invalid-input-box");
+
+        $("#SettingsBankNameError").text("");
+        $("#SettingsBranchCodeError").text("");
+        $("#SettingsAccountTypeError").text("");
+        $("#SettingsAccountNumberError").text("");
+
+        var bankName = $("#SettingsBankName").val();
+        var branchCode = $("#SettingsBranchCode").val();
+        var accountType = $("#SettingsAccountType").val();
+        var accountNo = $("#SettingsAccountNumber").val();
+
+        var success = true;
+
+        if(StringNullOrEmpty(bankName))
+        {
+            $("#SettingsBankNameError").text("*Please select Bank");
+            $("#SettingsBankName").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(branchCode))
+        {
+            $("#SettingsBranchCodeError").text("*Please enter Branch Code");
+            $("#SettingsBranchCode").addClass("invalid-input-box");
+            success = false;
+        }
+        if(StringNullOrEmpty(accountType))
+        {
+            $("#SettingsAccountTypeError").text("*Please select Account type");
+            $("#SettingsAccountType").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(accountNo))
+        {
+            $("#SettingsAccountNumberError").text("*Please enter account number");
+            $("#SettingsAccountNumber").addClass("invalid-input-box");
+            success = false;
+        }
+        return success;
+    }
+
+    function SaveBankDetails()
+    {
+        var bankName = $("#SettingsBankName").val();
+        var branchCode = $("#SettingsBranchCode").val();
+        var accountType = $("#SettingsAccountType").val();
+        var accountNo = $("#SettingsAccountNumber").val();
+
+        ShowAlertModal(
+            'Update Bank Details',
+            `Are you sure you want to update your bank details?`,
+            '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            if(confirmed)
+            {
+                var isValid = ValidateBankDetailsFields2();
+
+                if(!isValid)
+                    return;
+
+                ShowAppLoader(`Updating Bank Details...`);
+
+                var url = "@Url.Action("UpdateBankDetails", "Account")";
+
+                var payload =
+                {
+                    BankName: bankName,
+                    AccountNumber: accountNo,
+                    AccountType: accountType,
+                    BranchCode: branchCode
+                };
+
+                PerformAction(url, "POST", payload, PasswordChangedCallback);
+            }
+        });
+    }
+
+    function PasswordChangedCallback(success, response)
+    {
+        HideAppLoader();
+        if (success)
+        {
+            ShowAlertModal("Password Reset Success", `Your password has been successfully changed.`, "@AlertModalIconType.Success").then(function(okay)
+            {
+                HideShowElement("#PasswordChangeSection", HideShow.HIDE);
+                $("#PasswordResetButton").text("Request Password Change");
+            });
+        }
+        else
+        {
+            ShowAlertModal("Error", `${response.responseJSON.error}`, "@AlertModalIconType.Error");
+        }
+    }
+
+</script>

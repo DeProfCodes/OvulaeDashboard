@@ -1,0 +1,84 @@
+﻿
+:root
+{
+    --theme-bg-black: #282a36;
+    --theme-bg2: #05347e;
+    --theme-clr: #24ad3c;
+    --theme-clr-blue: #48bece;
+    --theme-blue: #48bece;
+    --theme-blue-2: #48bece;
+    --theme-green: #52af8b;
+    /*========================*/
+    --black-clr-1: #282a36;
+    --black-clr-2: #333644;
+    --gold-clr: #DAA520;
+    --green-clr: #aecc34;
+    --box-shadow2: 0 0.2rem 0.7rem rgba(var(--primary), 1);
+}
+
+/*====================== BG ==========================*/
+.theme-bg
+{
+    background: var(--black-clr-1) !important;
+}
+.app-blue-bg
+{
+    background: var(--theme-clr-blue) !important;
+}
+.app-gold-bg
+{
+    background: var(--gold-clr) !important;
+}
+.theme-txt
+{
+    color: var(--theme-clr-main) !important
+}
+
+/*===================== CLR =========================*/
+.app-blue-clr
+{
+    color: var(--theme-clr-blue) !important;
+}
+.app-gold-clr
+{
+    color: var(--gold-clr) !important;
+}
+.app-green-clr
+{
+    color: var(--green-clr) !important;
+}
+
+.theme-btn-1
+{
+    background: var(--theme-clr-blue) !important;
+    border-color: var(--theme-clr-blue) !important;
+}
+
+.theme-btn-1:hover
+{
+    background: #0077c0 !important;
+}
+
+.theme-side-nav
+{
+    background: red !important;
+}
+
+.clr-blue
+{
+    color: var(--dark-blue) !important;
+}
+
+.theme-t-green
+{
+    color: var(--theme-green) !important;
+}
+.theme-t-blue
+{
+    color: var(--theme-blue) !important;
+}
+
+.card-box-shadow
+{
+    box-shadow: var(--box-shadow2) !important;
+}

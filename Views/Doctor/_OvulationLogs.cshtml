@@ -1,0 +1,605 @@
+﻿@using OvulaeDashboard.ViewModels.Doctor
+@using OvulaeShared.Enums.App
+@using OvulaeShared.Helpers.CommonFunctions
+@using OvulaeShared.Models.Ovulation
+@model OvulationLogsViewModel
+
+@{
+    List<OvulationCycleLog> ovulationLogs = Model.Logs;
+    var patientUserId = Model.PatientUserId;
+
+    int GetInt(int? value)
+    {
+        return DefaultValueHelper.GetIntValueOrDefault(value);
+    }
+
+    string trackerType = "ovulation";
+}
+
+<div class="card module-card @(ViewBag.IsCurrent == true ? "current-tracker" : "")" id="@(trackerType)-tracker">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0 text-white"><i class="bi bi-droplet"></i> Ovulation Tracker</h5>
+        <div class="pagination-info" id="@(trackerType)-pagination-info">
+            <small>Loading...</small>
+        </div>
+    </div>
+    <div class="card-body" id="@(trackerType)-card-body">
+        @if (!ovulationLogs.Any())
+        {
+            <p class="text-muted">No ovulation logs available</p>
+        }
+        else
+        {
+            foreach (var log in ovulationLogs.OrderByDescending(x => x.LogDate))
+            {
+                <div class="log-entry @(trackerType)-log-entry">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>@log.PhaseName Phase</strong>
+                            <small class="text-muted ms-2">@log.LogDate.ToString("dd MMM yyyy, dddd")</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge @(log.IsFertileWindow ? "bg-success" : "bg-secondary")">
+                                @(log.IsFertileWindow ? "Fertile" : "Not Fertile")
+                            </span>
+                            <span class="badge @(log.HadBleeding ? "bg-danger" : "bg-secondary")">
+                                @(log.HadBleeding ? "Bleeding" : "No Bleeding")
+                            </span>
+                            <button class="btn btn-sm btn-outline-primary @(trackerType)-toggle-details-btn" data-log-id="@log.EntryId">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Minimal Bars Only -->
+                    <div class="compact-2col-ratings mt-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Mood: @GetInt(log.MoodsRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.MoodsRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.MoodsRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Symptoms: @GetInt(log.SymptomsRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.SymptomsRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.SymptomsRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Energy: @GetInt(log.EnergyRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.EnergyRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.EnergyRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Cravings: @GetInt(log.CravingsRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.CravingsRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.CravingsRating);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Emotions: @GetInt(log.EmotionsRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.EmotionsRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.EmotionsRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Lifestyle: @GetInt(log.LifestyleRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.LifestyleRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.LifestyleRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Breast: @GetInt(log.BreastTendernessRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(GetInt(log.BreastTendernessRating * 10))%; background: @HtmlCssHelper.GetColorForRating(log.BreastTendernessRating)"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Pain: @(log.HasPain ? "Yes" : "None")</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.HasPain ? "80%" : "0%"); background: @(log.HasPain ? "#ff6b6b" : "#6c757d")"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        @if (log.Symptoms.Any())
+                        {
+                            <div class="mb-2">
+                                @foreach (var symptom in log.Symptoms)
+                                {
+                                    <span class="symptom-badge bg-theme-clr-3 text-white">@symptom</span>
+                                }
+                            </div>
+                        }
+
+                        @if (log.Moods.Any())
+                        {
+                            <div class="mb-2">
+                                @foreach (var mood in log.Moods)
+                                {
+                                    <span class="symptom-badge bg-theme-clr-main text-black">@mood</span>
+                                }
+                            </div>
+                        }
+
+                        <!-- Fertility Signs -->
+                        <div class="mb-2">
+                            @if (!string.IsNullOrEmpty(log.CervicalMucusType))
+                            {
+                                <span class="badge bg-info">Mucus: @log.CervicalMucusType</span>
+                            }
+                            @if (log.BasalBodyTempCelsius.HasValue)
+                            {
+                                <span class="badge bg-warning text-dark">BBT: @log.BasalBodyTempCelsius.Value.ToString("F1")°C</span>
+                            }
+                            @if (log.LHTestResult != "NotTaken")
+                            {
+                                <span class="badge @(log.LHTestResult == "Positive" ? "bg-success" : "bg-secondary")">
+                                    LH: @log.LHTestResult
+                                </span>
+                            }
+                        </div>
+
+                        @if (log.HadBleeding)
+                        {
+                            <div class="mb-2">
+                                <span class="badge bg-danger">Flow: @log.FlowIntensity</span>
+                                @if (!string.IsNullOrEmpty(log.BleedingColor))
+                                {
+                                    <span class="badge bg-warning text-dark">Color: @log.BleedingColor</span>
+                                }
+                                @if (log.HasPain)
+                                {
+                                    <span class="badge bg-info">Pain: @log.PainLevel</span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div id="log-details-ovulation-@log.EntryId" class="d-none mt-3">
+
+                        <!-- Fertility & Physical Signs -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-section">
+                                    <h6>Fertility Tracking</h6>
+                                    <p><strong>Cervical Mucus:</strong> @log.CervicalMucusType</p>
+                                    @if (log.BasalBodyTempCelsius.HasValue)
+                                    {
+                                        <p><strong>Basal Body Temp:</strong> @log.BasalBodyTempCelsius.Value.ToString("F1")°C</p>
+                                    }
+                                    <p><strong>LH Test:</strong> @log.LHTestResult</p>
+                                    <p><strong>Cervix Position:</strong> @log.CervixPosition</p>
+                                    <p><strong>Cervix Feel:</strong> @log.CervixFeel</p>
+                                    <p><strong>Fertile Window:</strong> @(log.IsFertileWindow ? "Yes" : "No")</p>
+                                    @if (log.MarkedAsPeakDay)
+                                    {
+                                        <p><strong>Peak Day:</strong> Yes</p>
+                                    }
+                                </div>
+
+                                <!-- Intercourse & Contraception -->
+                                <div class="detail-section">
+                                    <h6>Intercourse & Protection</h6>
+                                    <p><strong>Had Intercourse:</strong> @(log.HadIntercourse ? "Yes" : "No")</p>
+                                    @if (log.HadIntercourse)
+                                    {
+                                        <p><strong>Timing:</strong> @log.IntercourseTiming</p>
+                                        <p><strong>Used Protection:</strong> @(log.UsedProtection ? "Yes" : "No")</p>
+                                        @if (!string.IsNullOrEmpty(log.ContraceptiveMethod))
+                                        {
+                                            <p><strong>Method:</strong> @log.ContraceptiveMethod</p>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-section">
+                                    <h6>Physical Health</h6>
+                                    <p><strong>Energy Level:</strong> @log.EnergyLevel</p>
+                                    <p><strong>Pain Level:</strong> @log.PainLevel</p>
+                                    @if (log.HadBleeding)
+                                    {
+                                        <p><strong>Bleeding:</strong> Yes</p>
+                                        <p><strong>Flow Intensity:</strong> @log.FlowIntensity</p>
+                                        <p><strong>Color:</strong> @log.BleedingColor</p>
+                                        @if (log.BleedingDurationDays.HasValue)
+                                        {
+                                            <p><strong>Duration:</strong> @log.BleedingDurationDays day(s)</p>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p><strong>Bleeding:</strong> No</p>
+                                    }
+                                    @if (log.HadMidCycleSpotting)
+                                    {
+                                        <p><strong>Mid-cycle Spotting:</strong> Yes</p>
+                                        <p><strong>Details:</strong> @log.SpottingDetails</p>
+                                    }
+                                </div>
+
+                                <!-- Breast Health -->
+                                @if (!string.IsNullOrEmpty(log.BreastTendernessNotes) || log.BreastTendernessRating.HasValue)
+                                {
+                                    <div class="detail-section">
+                                        <h6>Breast Health</h6>
+                                        @if (log.BreastTendernessRating.HasValue)
+                                        {
+                                            <p><strong>Tenderness Rating:</strong> @log.BreastTendernessRating/10</p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.BreastTendernessNotes))
+                                        {
+                                            <p><strong>Notes:</strong> @log.BreastTendernessNotes</p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Mental & Emotional Health -->
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <div class="detail-section">
+                                    <h6>Mental & Emotional</h6>
+                                    <p><strong>Mood Notes:</strong> @log.MoodsNotes</p>
+                                    <p><strong>Emotion Notes:</strong> @log.EmotionsNotes</p>
+                                    @if (!string.IsNullOrEmpty(log.SymptomsNotes))
+                                    {
+                                        <p><strong>Symptoms Notes:</strong> @log.SymptomsNotes</p>
+                                    }
+                                </div>
+
+                                @if (log.Cravings.Any())
+                                {
+                                    <div class="detail-section">
+                                        <h6>Cravings</h6>
+                                        @foreach (var craving in log.Cravings)
+                                        {
+                                            <span class="badge bg-success mb-2">@craving</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.CravingsNotes))
+                                        {
+                                            <p class="mt-1"><small>@log.CravingsNotes</small></p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                @if (log.LifestyleFactors.Any())
+                                {
+                                    <div class="detail-section">
+                                        <h6>Lifestyle Factors</h6>
+                                        @foreach (var factor in log.LifestyleFactors)
+                                        {
+                                            <span class="badge bg-primary mb-2">@factor</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.LifestyleNotes))
+                                        {
+                                            <p class="mt-1"><small>@log.LifestyleNotes</small></p>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- Bowel Movements -->
+                                @if (log.HadBowelMovements.HasValue)
+                                {
+                                    <div class="detail-section">
+                                        <h6>Bowel Movements</h6>
+                                        <p><strong>Had BM:</strong> @(log.HadBowelMovements.Value ? "Yes" : "No")</p>
+                                        @if (!string.IsNullOrEmpty(log.BowelMovementsRegularity))
+                                        {
+                                            <p><strong>Regularity:</strong> @log.BowelMovementsRegularity</p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.BowelMovementsFrequency))
+                                        {
+                                            <p><strong>Frequency:</strong> @log.BowelMovementsFrequency</p>
+                                        }
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(log.EnergyNotes))
+                                {
+                                    <div class="detail-section">
+                                        <h6>Energy Notes</h6>
+                                        <p>@log.EnergyNotes</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- User Notes -->
+                        @if (!string.IsNullOrEmpty(log.Notes))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <div class="detail-section">
+                                        <h6>Daily Notes</h6>
+                                        <div class="reflection-box">
+                                            <i class="bi bi-chat-quote text-muted me-2"></i>
+                                            @log.Notes
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Doctor's Notes Section -->
+                        <div class="doctors-notes-section mt-3 border-top pt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-clipboard-plus text-primary"></i> Doctor's Notes
+                                </h6>
+                                <button class="btn btn-sm btn-outline-secondary @(trackerType)-edit-notes-btn"
+                                        data-log-id="@log.EntryId"
+                                        data-original-notes="@log.DoctorsNotes">
+                                    <i class="bi bi-pencil"></i> Add Notes
+                                </button>
+                            </div>
+
+                            <!-- Display current notes -->
+                            <div id="@(trackerType)-doctors-notes-display-@log.EntryId" class="@(trackerType)-doctors-notes-display">
+                                @if (!string.IsNullOrEmpty(log.DoctorsNotes))
+                                {
+                                    <div class="notes-content bg-light p-3 rounded">
+                                        <p class="mb-0 text-theme-clr-main-dark">@log.DoctorsNotes</p>
+                                        <small class="text-muted fs-10">
+                                            @if (log.DoctorResponseTime.HasValue)
+                                            {
+                                                <text>Last updated: @log.DoctorResponseTime.Value.ToString("dd MMM yyyy HH:mm")</text>
+                                            }
+                                            else
+                                            {
+                                                <text>No update time recorded</text>
+                                            }
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted fst-italic">
+                                        <i class="bi bi-info-circle"></i> No notes yet
+                                    </div>
+                                }
+                            </div>
+
+                            @{
+                                var editorId = $"notes-textarea-{trackerType}-{log.EntryId}";
+                            }
+                            <!-- Edit notes section (hidden by default) -->
+                            <div id="@(trackerType)-doctors-notes-edit-@log.EntryId" class="@(trackerType)-doctors-notes-edit d-none">
+                                <textarea class="form-control notes-textarea"
+                                  id="@editorId"
+                                  rows="3"
+                                  placeholder="Enter doctor's notes here...">@log.DoctorsNotes</textarea>
+                                <div class="mt-2 d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-outline-secondary @(trackerType)-cancel-edit-btn"
+                                            data-log-id="@log.EntryId">
+                                        Cancel
+                                    </button>
+                                    <button class="btn btn-sm btn-primary @(trackerType)-save-notes-btn"
+                                            onclick="SaveDoctorNotesOvulation('@log.OvulationTrackerLogId', '@log.EntryId','@editorId')">
+                                        <i class="bi bi-check-lg"></i> Save Notes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Pagination Controls -->
+            <div class="pagination-controls mt-4 d-flex justify-content-between align-items-center" id="@(trackerType)-pagination-controls">
+                <div class="pagination-info">
+                    <small class="text-muted">Page <span class="current-page">1</span> of <span class="total-pages">0</span></small>
+                </div>
+                <div class="pagination-buttons">
+                    <button class="btn btn-outline-primary btn-sm me-2 @(trackerType)-newer-btn" style="display: none;">
+                        <i class="bi bi-chevron-left"></i> Newer
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm @(trackerType)-older-btn" style="display: none;">
+                        Older <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+
+    function navigateToPage@(trackerType.ToUpper())(page)
+    {
+        const pageSize = 3;
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+
+        // Hide all ovulation logs, show only current page
+        $('.@(trackerType)-log-entry').hide().slice(startIndex, endIndex).show();
+
+        updatePaginationControls@(trackerType.ToUpper())(page);
+        closeAllDetails@(trackerType.ToUpper())();
+    }
+
+    function updatePaginationControls@(trackerType.ToUpper())(currentPage) {
+        const totalLogs = $('.@(trackerType)-log-entry').length;
+        const pageSize = 3;
+        const totalPages = Math.ceil(totalLogs / pageSize);
+
+        // Update displayed text
+        const start = ((currentPage - 1) * pageSize) + 1;
+        const end = Math.min(currentPage * pageSize, totalLogs);
+        $('#@(trackerType)-pagination-info small').text(`Showing ${start}-${end} of ${totalLogs} logs`);
+        $('#@(trackerType)-pagination-controls .current-page').text(currentPage);
+        $('#@(trackerType)-pagination-controls .total-pages').text(totalPages);
+
+        // Update buttons
+        $('.@(trackerType)-newer-btn').toggle(currentPage > 1);
+        $('.@(trackerType)-older-btn').toggle(currentPage < totalPages);
+    }
+
+    function closeAllDetails@(trackerType.ToUpper())() {
+        $('[id^="log-details-ovulation-"]').addClass('d-none');
+        $('.@(trackerType)-toggle-details-btn i').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+    }
+
+    // Event handlers with jQuery - scoped to ovulation tracker
+    $(document).ready(function() {
+        // Ovulation pagination button clicks
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-newer-btn', function() {
+            const currentPage = parseInt($('#@(trackerType)-pagination-controls .current-page').text());
+            navigateToPage@(trackerType.ToUpper())(currentPage - 1);
+        });
+
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-older-btn', function() {
+            const currentPage = parseInt($('#@(trackerType)-pagination-controls .current-page').text());
+            navigateToPage@(trackerType.ToUpper())(currentPage + 1);
+        });
+
+        // Ovulation toggle details
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-toggle-details-btn', function() {
+            const $btn = $(this);
+            const logId = $btn.data('log-id');
+            const $details = $('#log-details-ovulation-' + logId);
+            const $icon = $btn.find('i');
+
+            $details.toggleClass('d-none');
+            $icon.toggleClass('bi-chevron-down bi-chevron-up');
+        });
+
+        // Initialize ovulation tracker
+        navigateToPage@(trackerType.ToUpper())(1);
+        initializeDoctorsNotes@(trackerType.ToUpper())();
+    });
+
+    // Doctors Notes functionality
+    function initializeDoctorsNotes@(trackerType.ToUpper())()
+    {
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-edit-notes-btn', function() {
+            const logId = $(this).data('log-id');
+            const originalNotes = $(this).data('original-notes') || '';
+
+            // Show edit section, hide display section
+            $('#@(trackerType)-doctors-notes-display-' + logId).hide();
+            $('#@(trackerType)-doctors-notes-edit-' + logId).removeClass('d-none');
+
+            // Focus the textarea
+            $('#notes-textarea-' + logId).focus();
+        });
+
+        // Cancel edit button click
+        $('.card-body').on('click', '.@(trackerType)-cancel-edit-btn', function() {
+            const logId = $(this).data('log-id');
+            const originalNotes = $('.@(trackerType)-edit-notes-btn[data-log-id="' + logId + '"]').data('original-notes') || '';
+
+            // Reset textarea to original value
+            $('#notes-textarea-' + logId).val(originalNotes);
+
+            // Show display section, hide edit section
+            $('#@(trackerType)-doctors-notes-edit-' + logId).addClass('d-none');
+            $('#@(trackerType)-doctors-notes-display-' + logId).show();
+
+            // Hide save button
+            $('.@(trackerType)-save-notes-btn[data-log-id="' + logId + '"]').addClass('d-none');
+        });
+
+        // Textarea input change
+        $('.card-body').on('input', '.notes-textarea', function() {
+            const logId = $(this).attr('id').replace('notes-textarea-', '');
+            const currentValue = $(this).val();
+            const originalNotes = $('.@(trackerType)-edit-notes-btn[data-log-id="' + logId + '"]').data('original-notes') || '';
+
+            // Show/hide save button based on changes
+            const saveBtn = $('.@(trackerType)-save-notes-btn[data-log-id="' + logId + '"]');
+            if (currentValue !== originalNotes) {
+                saveBtn.removeClass('d-none');
+            } else {
+                saveBtn.addClass('d-none');
+            }
+        });
+    }
+
+    function updateDoctorsNotesUI(logId, notes) {
+        // Update the display section
+        const displaySection = $('#@(trackerType)-doctors-notes-display-' + logId);
+
+        if (notes) {
+            displaySection.html(`
+                <div class="notes-content bg-light p-3 rounded">
+                    <p class="mb-0">${notes}</p>
+                    <small class="text-muted">Last updated: Just now</small>
+                </div>
+            `);
+        } else {
+            displaySection.html(`
+                <div class="text-muted fst-italic">
+                    <i class="bi bi-info-circle"></i> No notes yet
+                </div>
+            `);
+        }
+
+        // Update the edit button data
+        $('.@(trackerType)-edit-notes-btn[data-log-id="' + logId + '"]').data('original-notes', notes);
+
+        // Hide edit section, show display section
+        $('#@(trackerType)-doctors-notes-edit-' + logId).addClass('d-none');
+        displaySection.show();
+
+        // Hide save button
+        $('.@(trackerType)-save-notes-btn[data-log-id="' + logId + '"]').addClass('d-none');
+    }
+
+    function SaveDoctorNotesOvulation(moduleLogId, entryId, notesEditorId)
+    {
+        ShowAlertModal(
+             'Add Notes for this day?',
+             `Are you sure you want to Submit notes to patient? The patient will be notified about this immediately.`,
+             '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            var url = "@Url.Action("UpdateModuleLogDoctorsNotes", "Doctor")";
+
+            var payload =
+            {
+                ModuleType: '@ModuleType.Ovulation',
+                PatientUserId: '@patientUserId',
+                ModuleLogId: moduleLogId,
+                EntryId: entryId,
+                Notes: $(`#${notesEditorId}`).val()
+            };
+
+            ShowAppLoader("Sending notes to patient...");
+
+            PerformAction(url, "POST", payload, OvulationNotesCallback);
+        });
+    }
+
+    function OvulationNotesCallback(success, response)
+    {
+        if (success)
+        {
+            HideAppLoader();
+
+            ShowAlertModal(
+                'Notes saved',
+                `Your notes for the day have been saved and sent to user`,
+                '@AlertModalIconType.Information').then(function (confirmed)
+            {
+                ForceHardReloadNow();
+            });
+        }
+        else
+        {
+            HideAppLoader();
+            ShowAlertModal('Not Saved', `Something went wrong, please try again later`, '@AlertModalIconType.Error');
+        }
+    }
+
+</script>

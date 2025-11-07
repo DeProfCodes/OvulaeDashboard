@@ -1,0 +1,90 @@
+﻿/*======================= CUSTOM COLORS & BACKGROUND COLORS ===================*/
+
+.bg-green
+{
+    background: green !important;
+}
+.clr-green
+{
+    color: green !important;
+}
+
+.bg-deepskyblue
+{
+    background: deepskyblue !important;
+}
+.clr-deepskyblue
+{
+    color: deepskyblue !important;
+}
+
+.bg-orange
+{
+    background: orange !important;
+}
+.clr-orange
+{
+    color: orange !important;
+}
+
+.bg-deeppink
+{
+    background: deeppink !important;
+}
+.clr-deeppink
+{
+    color: deeppink !important;
+}
+
+.bg-blue
+{
+    background: blue !important;
+}
+.clr-blue
+{
+    color: blue !important;
+}
+
+.bg-black
+{
+    background: black !important;
+}
+.clr-black
+{
+    color: black !important;
+}
+
+.bg-red
+{
+    background: red !important;
+}
+.clr-red
+{
+    color: red !important;
+}
+.border-danger 
+{
+    border-color: #ff562f !important;
+}
+.border-primary 
+{
+    border-color: #0052cc !important;
+}
+
+.bg-silver
+{
+    background: silver !important;
+}
+.clr-silver
+{
+    color: silver !important;
+}
+
+.bg-spring-green
+{
+    background: springgreen !important;
+}
+.clr-spring-green
+{
+    color: springgreen !important;
+}

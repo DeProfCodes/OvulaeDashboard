@@ -1,0 +1,470 @@
+﻿@using OvulaeDashboard.ViewModels.Affiliate
+@using System.Text.Json
+@model AffiliateMainDashboardViewModel
+
+@{
+	ViewData["Title"] = "Affiliate Dashboard";
+
+	var isOverDue = DateTime.Now.Day > 20;
+}
+
+
+@{
+	await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+			{
+				Icon = "bi-house",
+				PageType = AppPageType.AffiliateDashboard
+			});	
+}
+
+<section class="py-2">
+	<div class="row g-3">
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100" style="background: var(--theme-clr-main); color: white; border-radius: 16px;">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-cash-coin fs-3"></i></div>
+						<span class="badge bg-light text-dark hidden">USD</span>
+					</div>
+					<h6>Total Earnings</h6>
+					<h3 class="fs-dynamic-large-3 fw-bold">@Model.TotalEarnings</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100 bg-success" style="color: white; border-radius: 16px;">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-credit-card-2-front fs-3"></i></div>
+						<span class="badge bg-light text-dark">Paid</span>
+					</div>
+					<h6>Total Paid</h6>
+					<h3 class="fs-dynamic-large-3 fw-bold">@Model.TotalPaid</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100 bg-warning" style="color: white; border-radius: 16px;">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-clock-history fs-3"></i></div>
+						<span class="badge bg-light text-dark">Pending</span>
+					</div>
+					<h6>Pending Payout  <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Total earned commissions not yet paid out."></i></h6>
+					<h3 class="fs-dynamic-large-3 fw-bold">@Model.TotalPendingAmount</h3>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-3 col-6">
+			<div class="card shadow-sm border-0 h-100" style="background: var(--theme-clr-purple); color: #333; border-radius: 16px;">
+				<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div><i class="bi bi-graph-up-arrow fs-3 text-dark"></i></div>
+						<span class="badge bg-dark text-white">%</span>
+					</div>
+					<h6>Conversion Rate</h6>
+					<h3 class="fs-dynamic-large-3 fw-bold">@Model.ConversionRate</h3>
+					<small class="text-muted"><span>@Model.ClicksCount</span> Clicks • <span>@Model.JoinedTotal</span> Joined</small>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 col-12 hidden">
+			<div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
+				<div class="card-body d-flex align-items-center">
+					<div style="width: 140px;" class="text-center">
+						<canvas id="progressChart" width="120" height="120"></canvas>
+						<div class="mt-2">@Model.CurrentMonthJoins / 100</div>
+					</div>
+					<div class="ms-4">
+						<h6 class="fw-bold mb-1">Minimum Referrals</h6>
+						@if (Model.CurrentMonthJoins < 100)
+						{
+							var joinsRem = 100 - Model.CurrentMonthJoins;
+							<p class="text-muted mb-1" style="font-size: 14px;">
+								You need at least <strong>100 active referrals</strong> per month to remain an affiliate.
+							</p>
+							<span class="badge bg-warning text-dark">@joinsRem more to stay active</span>
+						}
+						else
+						{
+							<p class="text-muted mb-1" style="font-size: 14px;">
+								You have reached the minimum referals required per month to remain an affiliate 🏆.
+							</p>
+							<span class="badge bg-theme-clr-main text-white">@Model.CurrentMonthJoins qualified 🏆</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6 col-12">
+			<div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
+				<div class="card-body d-flex align-items-center">
+					<div style="width: 140px;" class="text-center">
+						<canvas id="levelChart" width="120" height="120"></canvas>
+						<div class="mt-2"><small>@Model.OverallJoins / @Model.NextLevelCount</small></div>
+					</div>
+					<div class="ms-4">
+						<h6 class="fw-bold mb-1">Level Progress</h6>
+						<p class="text-muted mb-1" style="font-size: 14px;">
+							Refer <strong>@Model.NextLevelCount</strong> to unlock the next affiliate level and increase commission.
+						</p>
+						<span class="badge bg-success">Next Level: @Model.NextLevelCount Goal</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="card mb-4">
+		<div class="card-body">
+			<h5 class="mb-3">Your Referral Links</h5>
+
+			<!-- Google Play Referral -->
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<div class="d-flex">
+						<img src="~/images/other_icons/playstore.png" alt="Google Play" style="width: 20px; height: 20px; margin-right: 8px;" />
+						Google Play Referal Link
+					</div>
+					<div class="input-group mt-2">
+						<input type="text" class="form-control" value="@Model.GooglePlayStoreLink" readonly style="font-size: 13px;" />
+						<button class="btn btn-sm btn-primary" onclick="shareLink('playstoreLink')" style="padding: 0 5px;"><i class="bi bi-share me-2 fs-12"></i>Share</button>
+					</div>
+				</div>
+
+				<!-- Apple App Store Referral -->
+				<div class="col-md-6">
+					<label class="form-label d-flex align-items-center">
+						<img src="~/images/other_icons/apple_icon.png" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" />
+						Apple App Store Referal Code
+					</label>
+					<div class="input-group mt-2">
+						<input type="text" class="form-control fs-18" value="@Model.AppleAppStoreLink" readonly style="font-size: 13px;" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row mb-4">
+		<div class="col-md-6">
+			<div class="card p-3">
+				<div class="d-flex justify-content-between align-items-center">
+					<h6 class="mb-0">Earnings Over Time</h6>
+					<select id="EarningsFilter" class="form-select form-select-sm w-auto">
+						<option value="1">Today</option>
+						<option value="7">7 Days</option>
+						<option value="30" selected>1 Month</option>
+						<option value="90">3 Months</option>
+						<option value="365">1 Year</option>
+					</select>
+				</div>
+				<canvas id="EarningsChart" height="360" style="max-height:360px"></canvas>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card p-3">
+				<div class="d-flex justify-content-between align-items-center">
+					<h6 class="mb-0">Earnings vs Net Earnings</h6>
+					<select id="EarnVsNetFilter" class="form-select form-select-sm w-auto">
+						<option value="1">Today</option>
+						<option value="7">7 Days</option>
+						<option value="30" selected>1 Month</option>
+						<option value="90">3 Months</option>
+						<option value="365">1 Year</option>
+					</select>
+				</div>
+				<canvas id="EarnVsNetChart" height="360" style="max-height:360px"></canvas>
+			</div>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			<h5 class="mb-3">Commission Breakdown</h5>
+			<div class="p-0 card-body">
+				<div class="app-scroll table-responsive app-datatable-default">
+					<div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">
+						<table id="commissionsTable" class="w-100 display default-data-table align-middle table">
+							<thead>
+								<tr>
+									<th class="text-center">Date</th>
+									<th class="text-center">Device Type</th>
+									<th class="text-center">Country</th>
+									<th class="text-center">Activity</th>
+									<th class="text-center">Commission</th>
+									<th class="text-center">Status</th>
+								</tr>
+							</thead>
+							<tbody class="fs-12">
+								@foreach (var referal in Model.CommissionBreakdown)
+								{
+									var deviceIcon = referal.DeviceType == MobileDeviceType.Android ? "playstore.png" : "apple_icon.png";
+									<tr>
+										<td class="table-td text-center">@referal.JoinDate.ToString("dd-MM-yyyy")</td>
+										<td class="table-td text-center"><img src="~/images/other_icons/@deviceIcon" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" /></td>
+										<td class="table-td text-center">@Html.Raw(HtmlCssHelper.GetCountryAndFlagDiv(referal.CountryCode))</td>
+										<td class="table-td text-center">@referal.SubscriptionType</td>
+										<td class="table-td text-center">@HtmlCssHelper.GetFormatedAmount(referal.Commission)</td>
+										<td class="table-td text-center"><span class="badge" style="background-color: var(--theme-clr-3);">Paid</span></td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</section>
+
+@{
+
+	var earnings = Model.EarningsOverTime;
+	var earnVsNet = Model.EarningsVsNet;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+	$(document).ready(function ()
+	{
+		HideAppLoader();
+		updateEarningsCharts(30);
+		updateEarnVsNetCharts(30);
+
+		$('#EarningsFilter').on('change', function ()
+		{
+			const days = parseInt($(this).val());
+			updateEarningsCharts(days);
+		});
+
+		$('#EarnVsNetFilter').on('change', function ()
+		{
+			const days = parseInt($(this).val());
+			updateEarnVsNetCharts(days);
+		});
+
+		// 🟣 Create the referral and level charts
+
+		var currentMonthJoins = parseInt("@Model.CurrentMonthJoins");
+		var overallJoins = parseInt("@Model.OverallJoins");
+		var nextLevelJoins = parseInt("@Model.NextLevelCount");
+
+		createCircleChart('progressChart', currentMonthJoins, 100, '#6a5acd');   
+		createCircleChart('levelChart', overallJoins, nextLevelJoins, '#20c997');   
+
+		new DataTable("#commissionsTable");
+	});
+
+	function filterEarningsOverall(days)
+	{
+		if (days === 1)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Today").Select(x => x.Label)));
+			var values = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Today").Select(x => x.Value1)));
+
+			return { labels: labels, data: values };
+		}
+		else if (days === 7)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last7Days").Select(x => x.Label)));
+			var values = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last7Days").Select(x => x.Value1)));
+
+			return { labels: labels, data: values };
+		}
+		else if (days === 30)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastMonth").Select(x => x.Label)));
+			var values = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastMonth").Select(x => x.Value1)));
+
+			return { labels: labels, data: values };
+		}
+		else if (days === 90)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last3Months").Select(x => x.Label)));
+			var values = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last3Months").Select(x => x.Value1)));
+
+			return { labels: labels, data: values };
+		}
+		else
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastYear").Select(x => x.Label)));
+			var values = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastYear").Select(x => x.Value1)));
+
+			return { labels: labels, data: values };
+		}
+	}
+
+	function filterEarningsVsSales(days)
+	{
+		if (days === 1)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Today").Select(x => x.Label)));
+			var values1 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Today").Select(x => x.Value1)));
+			var values2 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Today").Select(x => x.Value2)));
+
+			return { labels: labels, sales: values1, net: values2 };
+		}
+		else if (days === 7)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last7Days").Select(x => x.Label)));
+			var values1 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last7Days").Select(x => x.Value1)));
+			var values2 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last7Days").Select(x => x.Value2)));
+
+			return { labels: labels, sales: values1, net: values2 };
+		}
+		else if (days === 30)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastMonth").Select(x => x.Label)));
+			var values1 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastMonth").Select(x => x.Value1)));
+			var values2 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastMonth").Select(x => x.Value2)));
+
+			return { labels: labels, sales: values1, net: values2 };
+		}
+		else if (days === 90)
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last3Months").Select(x => x.Label)));
+			var values1 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last3Months").Select(x => x.Value1)));
+			var values2 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "Last3Months").Select(x => x.Value2)));
+
+			return { labels: labels, sales: values1, net: values2 };
+		}
+		else
+		{
+			var labels = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastYear").Select(x => x.Label)));
+			var values1 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastYear").Select(x => x.Value1)));
+			var values2 = @Html.Raw(JsonSerializer.Serialize(earnings.SelectMany(x => x).Where(x => x.DurationFilter == "LastYear").Select(x => x.Value2)));
+
+			return { labels: labels, sales: values1, net: values2 };
+		}
+	}
+
+	function updateEarningsCharts(days)
+	{
+		const earningsData = filterEarningsOverall(days);
+		if (EarningsChartInstance)
+		{
+			EarningsChartInstance.destroy();
+		}
+
+		const EarningsCtx = document.getElementById('EarningsChart').getContext('2d');
+		EarningsChartInstance = new Chart(EarningsCtx, 
+		{
+			type: 'line',
+			data: {
+				labels: earningsData.labels.length ? earningsData.labels : ['No Data'],
+				datasets: [{
+					label: 'Earnings',
+					data: earningsData.data.length ? earningsData.data : [0],
+					borderColor: '#b5a4de',
+					backgroundColor: 'rgba(181, 164, 222, 0.2)',
+					tension: 0.4
+				}]
+			},
+			options: {
+				responsive: true,
+				plugins: { legend: { display: false } }
+			}
+		});
+	}
+
+	function updateEarnVsNetCharts(days)
+	{
+		const earnVsNetData = filterEarningsVsSales(days);
+
+		if (earnVsNetChartInstance)
+		{
+			earnVsNetChartInstance.destroy();
+		}
+
+		const earnVsNetCtx = document.getElementById('EarnVsNetChart').getContext('2d');
+		earnVsNetChartInstance = new Chart(earnVsNetCtx,
+		{
+			type: 'bar',
+			data: {
+				labels: earnVsNetData.labels,
+				datasets: [
+					{ label: 'Earnings', data: earnVsNetData.sales, backgroundColor: '#cb6ce6' },
+					{ label: 'Net Earnings', data: earnVsNetData.net, backgroundColor: '#4506dd' }
+				]
+			},
+			options: {
+				responsive: true,
+				scales: { y: { beginAtZero: true } }
+			}
+		});
+	}
+
+	function createCircleChart(id, value, total, color)
+	{
+		const $canvas = $('#' + id);
+		if ($canvas.length === 0) return;
+
+		// Defer rendering until layout is ready
+		setTimeout(function ()
+		{
+			// Clear canvas and set proper dimensions
+			$canvas[0].width = 120;
+			$canvas[0].height = 120;
+
+			const ctx = $canvas[0].getContext('2d');
+
+			new Chart(ctx, {
+				type: 'doughnut',
+				data: {
+					labels: ['Completed', 'Remaining'],
+					datasets: [{
+						data: [value, total - value],
+						backgroundColor: [color, '#f0f0f0'],
+						borderWidth: 4 // Thinner ring
+					}]
+				},
+				options: {
+					responsive: false,
+					maintainAspectRatio: false,
+					cutout: '75%',
+					plugins: {
+						legend: { display: false },
+						tooltip: { enabled: false }
+					}
+				}
+			});
+		}, 100); // Wait a bit to ensure layout is stable
+	}
+
+
+	function shareLink(inputId)
+	{
+		var reflink = '@Model.GooglePlayStoreLink';
+
+		if (navigator.share)
+		{
+			navigator.share({
+				title: 'Check out Ovulae',
+				text: `Download the Ovulae app using my referral link!`,
+				url: reflink
+			})
+			.then(function ()
+			{
+				console.log('Link shared successfully');
+			})
+			.catch(function (error)
+			{
+				console.error('Share failed:', error);
+			});
+		}
+		else
+		{
+			alert('Sharing not supported on this device. Please copy the link manually.');
+		}
+	}
+
+
+
+</script>

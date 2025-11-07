@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "_DashboardLayout";
+}
+
+<link rel="stylesheet" href="~/css/app/account.css" />
+
+<div class="login-wrapper px-4">
+    <div class="login-card">
+
+        <!-- Logo -->
+        <div class="text-center mb-3 cursor-pointer" onclick="HomePage()">
+            <img src="~/images/logos/logo_main.webp" alt="Logo" style="height: 100px;" />
+        </div>
+
+        <!-- Login Title -->
+        <h4 class="text-center mb-3 mt-3 text-theme-clr-main">Welcome to Ovulae Portal</h4>
+        
+        <!-- Error -->
+        <p class="error-message text-center fw-bold" id="LoginError"></p>
+
+        <!-- Login Form -->
+        <div class="mb-3">
+            <input type="email" class="form-control" id="Email" placeholder="Enter your email">
+            <p class="error-message" id="EmailError"></p>
+        </div>
+
+        <div class="mb-4">
+            <div class="d-flex">
+                <input type="password" class="form-control" id="psw-input" placeholder="Enter your password">
+                <div class="password-visibility, mt-2" style="margin-left:-30px;">
+                    <i class="bi bi-eye pass-eye text-muted" style="cursor:pointer; font-size:20px;" onclick="TogglePasswordMask()"></i>
+                </div>
+            </div>
+            <p class="error-message" id="PasswordError2"></p>
+        </div>
+
+        <button type="submit" class="btn btn-theme-clr-main w-100" onclick="Login()">Login</button>
+
+        <!-- Meta Links -->
+        <div class="text-center mt-3 fs-14">
+            <a asp-action="PasswordReset" class="d-block text-decoration-none text-theme-clr-2 fw-semibold">Forgot Password?</a>
+            <p class="mb-0 mt-2">
+                Don't have an account?
+                <a asp-action="Register" class="text-theme-clr-2 fw-semibold text-decoration-none">Register</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+
+    $(document).ready(function ()
+    {
+        //HideShowElement("#PreLoaderModal", HideShow.HIDE);
+        //HideShowElement("#PreLoaderModalBackdrop", HideShow.HIDE);
+    });
+
+    function Login()
+    {
+        $("#Email").removeClass("invalid-input-box");
+        $("#psw-input").removeClass("invalid-input-box");
+        $("#EmailError").text("");
+        $("#PasswordError2").text("");
+
+        var email = $("#Email").val();
+        var password = $("#psw-input").val();
+
+        var success = true;
+
+        if (!CheckEmail(email))
+        {
+            $("#EmailError").text("*Enter valid email");
+            $("#Email").addClass("invalid-input-box");
+            success = false;
+        }
+        if (!CheckPasswordStrength())
+        {
+            $("#psw-input").addClass("invalid-input-box");
+            $("#PasswordError2").text("*Wrong Password");
+            success = false;
+        }
+
+        if(!success) return;
+
+        var url = "@Url.Action("Login", "Authentication")";
+        var payload =
+        {
+            Email: email,
+            Password: password
+        };
+
+        ShowAppLoader("Logging In...");
+
+        PerformAction(url, "POST", payload, LoginCallback);
+    }
+
+    function LoginCallback(success, response)
+    {
+        if (success)
+        {
+            window.location = response.loginURL;
+        }
+        else
+        {
+            HideAppLoader();
+            $("#LoginError").text(`*${response.responseJSON.error}`);
+        }
+    }
+
+</script>

@@ -1,0 +1,146 @@
+﻿
+<div class="modal hidden" id="AdminEditPlanModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false" style="display:block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <p class="w-100 text-center fw-bold fs-18">Admin Edit Plan: <span id="AdminEditPlanTitleName"></span></p>
+                <i class="bi bi bi-x-circle-fill text-danger modal-x-close" id="AdminEditPlanModalCloseIcon"></i>
+            </div>
+            <div class="modal-body">
+                <div class="mt-3">
+                    <label for="InvestmentPlanName" class="form-label fs-16 clr-blue fw-bold">Name</label>
+                    <input id="InvestmentPlanName" placeholder="Enter Plan Name" class="form-control" aria-invalid="false" type="text" maxlength="20">
+                    <p class="error-message fst-italic" id="InvestmentPlanNameError"></p>
+                </div>
+                <div class="mt-3">
+                    <label for="InvestmentPlanAmount" class="form-label fs-16 clr-blue fw-bold">Amount</label>
+                    <input id="InvestmentPlanAmount" placeholder="Enter Plan Amount" class="form-control" aria-invalid="false" type="text" maxlength="10">
+                    <p class="error-message fst-italic" id="InvestmentPlanAmountError"></p>
+                </div>
+                <div class="mt-3">
+                    <label for="InvestmentPlanTermination" class="form-label fs-16 clr-blue fw-bold">Termination</label>
+                    <input id="InvestmentPlanTermination" placeholder="Enter Termination Days" class="form-control" aria-invalid="false" type="text" maxlength="2">
+                    <p class="error-message fst-italic" id="InvestmentPlanTerminationError"></p>
+                </div>
+                <div class="mt-3">
+                    <label for="InvestmentPlanStartDate" class="form-label fs-16 clr-blue fw-bold">Start Date</label>
+                    <input id="InvestmentPlanStartDate"
+                           placeholder="Enter Start Date"
+                           class="form-control"
+                           type="datetime-local"
+                           value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                    <p class="error-message fst-italic" id="InvestmentPlanStartDateError"></p>
+                </div>
+                <div class="main-switch main-switch-color card-body py-0 mt-2">
+                    <div class="swich-size switch-primary d-flex">
+                        <label for="check-003" class="fs-16 clr-blue fw-bold me-2 cursor-pointer">Enable Auto Re-Invest Returns</label>
+                        <input id="check-003" class="toggle fs-12" type="checkbox">
+                        <label for="check-003" class="fs-16 clr-blue fw-bold"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="mx-auto">
+                    <button class="btn btn-sm btn-danger alert-modal-btn" id="AdminEditPlanModalCancelBtn">Cancel</button>
+                    <button class="btn btn-sm btn-primary alert-modal-btn ms-2" id="AdminEditPlanModalYesBtn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show hidden" id="AdminEditPlanModalBackdrop"></div>
+
+<script>
+
+    function OpenAdminEditPlanMondal(planName, amount, termination, startDate, autoReInvest)
+    {
+        FlushUserPlanModalValidationFormat();
+
+        $("#AdminEditPlanTitleName").text(planName);
+
+        $("#InvestmentPlanName").val(planName);
+        $("#InvestmentPlanAmount").val(amount);
+        $("#InvestmentPlanTermination").val(termination);
+        $("#InvestmentPlanStartDate").val(termination);
+
+        CheckOrUncheckInput("check-003", autoReInvest);
+
+        HideShowElement("#AdminEditPlanModal", HideShow.SHOW);
+        HideShowElement("#AdminEditPlanModalBackdrop", HideShow.SHOW);
+
+        var deferred = $.Deferred();
+
+        $("#AdminEditPlanModalYesBtn").off("click").on("click", function ()
+        {
+            if(ValidateUserPlanModalFields())
+            {
+                CloseAdminEditPlanMondal();
+                deferred.resolve(true);
+            }
+        });
+
+        $("#AdminEditPlanModalCancelBtn").off("click").on("click", function ()
+        {
+            CloseAdminEditPlanMondal();
+            deferred.resolve(false);
+        });
+
+        $("#AdminEditPlanModalCloseIcon").off("click").on("click", function ()
+        {
+            CloseAdminEditPlanMondal();
+            deferred.resolve(false);
+        });
+
+        return deferred.promise();
+    }
+
+    function CloseAdminEditPlanMondal()
+    {
+        HideShowElement("#AdminEditPlanModal", HideShow.HIDE);
+        HideShowElement("#AdminEditPlanModalBackdrop", HideShow.HIDE);
+    }
+
+    function FlushUserPlanModalValidationFormat()
+    {
+        $("#InvestmentPlanName").removeClass("invalid-input-box");
+        $("#InvestmentPlanAmount").removeClass("invalid-input-box");
+        $("#InvestmentPlanTermination").removeClass("invalid-input-box");
+        
+        $("#InvestmentPlanNameError").text("");
+        $("#InvestmentPlanAmountError").text("");
+        $("#InvestmentPlanTerminationError").text("");
+    }
+
+    function ValidateUserPlanModalFields()
+    {
+        FlushUserPlanModalValidationFormat();
+
+        var planName = $("#InvestmentPlanName").val();
+        var planAmount = $("#InvestmentPlanAmount").val();
+        var planTermination = $("#InvestmentPlanTermination").val();
+       
+        var success = true;
+
+        if(StringNullOrEmpty(planName))
+        {
+            $("#InvestmentPlanNameError").text("*Please enter Plan Name");
+            $("#InvestmentPlanName").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(planAmount))
+        {
+            $("#InvestmentPlanAmountError").text("*Please enter Amount");
+            $("#InvestmentPlanAmount").addClass("invalid-input-box");
+            success = false;
+        }
+        if(StringNullOrEmpty(planTermination))
+        {
+            $("#InvestmentPlanTerminationError").text("*Please enter termination");
+            $("#InvestmentPlanTermination").addClass("invalid-input-box");
+            success = false;
+        }
+        
+        return success;
+    }
+
+</script>

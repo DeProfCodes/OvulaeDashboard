@@ -1,0 +1,193 @@
+﻿/* ========================================= TOP NAV ==================================== */
+
+.top-nav-grid-dropdown-header
+{
+    background: linear-gradient(to right, rgb(52, 232, 158), rgb(15, 52, 67)) !important;
+}
+.top-nav-notifications-dropdown-header
+{
+    background: radial-gradient(circle at 12.3% 19.3%, rgb(85, 88, 218) 0%, rgb(95, 209, 249) 100.2%) !important;
+}
+.top-nav-profile-dropdown-header
+{
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(12,12,29,1) 42%, rgba(6,51,60,1) 100%);
+}
+/*====== TOP NAV END =======*/
+
+
+.sidebar::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb
+{
+    background-color: lavender;
+}
+
+.fw-bold
+{
+    font-weight:bold;
+}
+
+.active-page-header
+{
+    color: var(--white) !important;
+    background: var(--theme-clr-main) !important;
+    font-weight: 500;
+    border-radius: var(--app-border-radius) !important;
+    padding: .6rem 1rem;
+    font-size: 16px;
+    align-items: center;
+}
+.active-page-child
+{
+    color: #cb6ce6 !important;
+    font-weight:bold;
+}
+.active-page-child i
+{
+    background-color: #cb6ce6;
+    outline: 2px solid rgba(var(--primary), .2);
+    outline-offset: 2px;
+    animation: bounceIn .5s ease-in-out;
+}
+.left-nav-items, .left-nav-items i
+{
+    transition: none !important;
+}
+.left-nav-items:hover .bullet-point
+{
+    outline: 1px solid var(--white);
+}
+
+.page-title-link
+{
+    color: steelblue !important;
+}
+
+body
+{
+    background: var(--bodybg-color) !important;
+}
+
+:root
+{
+    --dark-blue: rgba(79, 201, 218, 1);
+    --dark-gray-1: #333644;
+    
+}
+
+/*========================================== BADGES ======================================*/
+.badge
+{
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    min-width: 19px
+}
+
+.badge-light
+{
+    background: #fff
+}
+
+.badge-dot
+{
+    text-indent: -999em;
+    padding: 0;
+    width: 8px;
+    height: 8px;
+    border: transparent solid 1px;
+    border-radius: 30px;
+    min-width: 2px
+}
+
+.badge-dot-lg
+{
+    width: 10px;
+    height: 10px
+}
+
+.badge-dot-xl
+{
+    width: 18px;
+    height: 18px;
+    position: relative
+}
+
+.badge-info
+{
+    color: #fff !important;
+    background-color: #16aaff !important;
+}
+
+.badge-warning
+{
+    color: #212529 !important;
+    background-color: #f7b924 !important;
+}
+
+.badge-danger
+{
+    color: #fff !important;
+    background-color: #d92550 !important;
+}
+
+.badge-light
+{
+    color: #212529 !important;
+    background-color: #eee !important;
+}
+
+.badge-dark
+{
+    color: #fff !important;
+    background-color: #343a40 !important;
+}
+
+.badge-focus
+{
+    color: #fff !important;
+    background-color: #444054 !important;
+}
+
+.badge-alternate
+{
+    color: #fff !important;
+    background-color: #794c8a !important;
+}
+
+.badge-primary
+{
+    color: #fff !important;
+    background-color: #3f6ad8 !important;
+}
+
+.badge-secondary
+{
+    color: #fff !important;
+    background-color: #6c757d !important;
+}
+
+.badge-success
+{
+    color: #fff !important;
+    background-color: #3ac47d !important;
+}
+
+.badge-dot-xl::before
+{
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: .25rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -5px 0 0 -5px;
+    background: #fff
+}
+
+.badge-dot-sm
+{
+    width: 6px;
+    height: 6px
+}
+
+

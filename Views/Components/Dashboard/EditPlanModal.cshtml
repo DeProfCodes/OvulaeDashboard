@@ -1,0 +1,74 @@
+﻿
+<div class="modal hidden" id="EditPlanModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false" style="display:block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <p class="w-100 text-center fw-bold fs-18">Edit Plan: <span id="EditPlanTitleName"></span></p>
+                <i class="bi bi bi-x-circle-fill text-danger modal-x-close" id="EditPlanModalCloseIcon"></i>
+            </div>
+            <div class="modal-body">
+                <div class="mt-3">
+                    <label for="InvestmentPlanName" class="form-label fs-16 clr-blue fw-bold">Name</label>
+                    <input id="InvestmentPlanName" placeholder="Enter Plan Name" class="form-control" aria-invalid="false" type="text" maxlength="20">
+                    <p class="error-message fst-italic" id="InvestmentPlanNameError"></p>
+                </div>
+                <div class="main-switch main-switch-color card-body py-0 mt-2">
+                    <div class="swich-size switch-primary d-flex">
+                        <label for="check-003" class="fs-16 clr-blue fw-bold me-2 cursor-pointer">Enable Auto Re-Invest Returns</label>
+                        <input id="check-003" class="toggle fs-12" type="checkbox">
+                        <label for="check-003" class="fs-16 clr-blue fw-bold"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="mx-auto">
+                    <button class="btn btn-sm btn-danger alert-modal-btn" id="EditPlanModalCancelBtn">Cancel</button>
+                    <button class="btn btn-sm btn-primary alert-modal-btn ms-2" id="EditPlanModalYesBtn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show hidden" id="EditPlanModalBackdrop"></div>
+
+<script>
+
+    function OpenEditPlanMondal(planName, autoReInvest)
+    {
+        $("#EditPlanTitleName").text(planName);
+        $("#InvestmentPlanName").val(planName);
+        CheckOrUncheckInput("check-003", autoReInvest);
+
+        HideShowElement("#EditPlanModal", HideShow.SHOW);
+        HideShowElement("#EditPlanModalBackdrop", HideShow.SHOW);
+
+        var deferred = $.Deferred();
+
+        $("#EditPlanModalYesBtn").off("click").on("click", function ()
+        {
+            CloseEditPlanMondal();
+            deferred.resolve(true);
+        });
+
+        $("#EditPlanModalCancelBtn").off("click").on("click", function ()
+        {
+            CloseEditPlanMondal();
+            deferred.resolve(false);
+        });
+
+        $("#EditPlanModalCloseIcon").off("click").on("click", function ()
+        {
+            CloseEditPlanMondal();
+            deferred.resolve(false);
+        });
+
+        return deferred.promise();
+    }
+
+    function CloseEditPlanMondal()
+    {
+        HideShowElement("#EditPlanModal", HideShow.HIDE);
+        HideShowElement("#EditPlanModalBackdrop", HideShow.HIDE);
+    }
+
+</script>

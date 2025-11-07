@@ -1,0 +1,514 @@
+﻿/* For WebKit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar
+{
+    width: 8px;
+}
+
+::-webkit-scrollbar-track
+{
+    background: var(--white); /* light grey */
+}
+
+::-webkit-scrollbar-thumb
+{
+    background-color: rgba(var(--primary), 0.8) !important; /* bootstrap blue or your custom blue */
+    border-radius: 10px;
+    border: 2px solid transparent; /* Optional for padding effect */
+}
+
+/* Optional: on hover */
+::-webkit-scrollbar-thumb:hover
+{
+    background-color: rgba(var(--primary), 1) !important;
+}
+
+
+.app-main__outer
+{
+    min-width: 330px;
+}
+
+#InvestmentPlanName
+{
+    width: 50% !important;
+}
+#NewPlanButton
+{
+    width: 50% !important;
+    min-width: 320px;
+    max-width: 400px;
+}
+#InvestmentPlanFeesDetails, #InvestmentPlanReturnsSummary
+{
+    border-left: 1px solid rgba(var(--secondary), .3) !important;
+}
+#PlanTerminateWeeksDays
+{
+    background: var(--white);
+    color: white;
+}
+#PlanTerminationCount
+{
+    height: 29px;
+}
+.border-t-b
+{
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+.border-b
+{
+    border-bottom: 1px solid gray;
+}
+.d-flex-custom
+{
+    display: flex;
+}
+.btn-lavender
+{
+    background: lavender !important;
+    border-color: rgb(153, 224, 222) !important;
+    color: black !important;
+}
+.btn-lavender:hover
+{
+    background: rgba(153, 224, 222, 1) !important;
+}
+.plan-action-card
+{
+    height: 120px;
+}
+.currency-input-box-plan
+{
+    width: 110px !important;
+}
+.plan-action-input
+{
+    padding: 2px 0 !important;
+    height: fit-content !important;
+    color: black !important;
+    width: 100% !important;
+}
+.currency-icon-plan
+{
+    padding-top: 2px !important;
+}
+#PlanWithdrawImg
+{
+    width: 50px;
+}
+#PlanWithdrawRest
+{
+    margin-top: -15px;
+}
+#PlanDepositImg
+{
+    width: 60px;
+}
+#PlanDepositRest
+{
+    margin-top: -15px;
+}
+.border-t-sep
+{
+    border-top: 1px dashed rgb(var(--primary));
+    padding-top:5px;
+}
+.plan-btn-group
+{
+    background-color: transparent;
+    color: rgba(var(--primary), 1);
+    width: 85px !important;
+    border: 1px solid rgba(var(--primary), 1) !important;
+}
+.plan-btn-group:hover
+{
+    background-color: rgba(var(--primary), 1) !important;
+}
+.plan-btn-group-active
+{
+    background-color: rgba(var(--primary), 1) !important;
+}
+#BreadcrumBtn:hover
+{
+    background-color: rgba(var(--primary), 0.7) !important;
+}
+.btn-x-sm
+{
+    padding: 5px 8px !important;
+    font-size: 13px !important;
+}
+.table-td-narrow
+{
+    padding: 5px 2px 5px 5px !important;
+}
+
+.bottom-nav-btn-txt
+{
+    margin-top: 5px !important;
+    margin-bottom: -5px;
+}
+ul.footer-nav li
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+ul.footer-nav li .w-fit-content
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -10px;
+}
+
+.footer-btn-icons.active, .bottom-nav-btn-txt.active
+{
+    color: #cb6ce6 !important;
+    font-weight: bold;
+}
+#WidthdrawBgImg
+{
+    width: 400px;
+    margin-left:auto;
+    margin-right: auto;
+}
+#WithdrawalAvailableAmount
+{
+    width: 400px;
+    margin-left:auto;
+    margin-right: auto;
+    margin-top: 30px;
+    border: 1px solid rgb(var(--primary));
+    padding: 10px !important;
+}
+.withdraw-available-amounts
+{
+    font-size: 16px;
+    font-weight: bold;
+    margin-left:20px;
+}
+#SupportContactForm
+{
+    width: 80%;
+    margin-left:auto;
+    margin-right: auto;
+}
+
+.support-contact-info, .support-contact-icon
+{
+    font-size: 16px;
+}
+#SupportContactInfoContainer
+{
+    border-left: 1px solid #474a56;
+}
+.table-td
+{
+    font-size: 14px !important;
+}
+
+
+.chart-wrapper
+{
+    min-height: 300px;
+    width: 100%;
+}
+
+.card-btn
+{
+    color: white;
+    border-radius: 16px;
+    cursor:pointer;
+}
+
+.card-btn:hover
+{
+    filter: brightness(90%);
+    transition: filter 0.2s ease;
+}
+
+#LoaderModal
+{
+    width: 350px !important;
+}
+
+@media screen and (max-width:1800px)
+{
+    .plan-action-card
+    {
+        height: 140px;
+    }
+}
+@media screen and (max-width:1670px)
+{
+    #PlanDepositImg
+    {
+        width: 40px;
+    }
+    #PlanDepositRest
+    {
+        margin-top: 0;
+    }
+}
+@media screen and (max-width:1600px)
+{
+    #PlanWithdrawImg, #PlanDepositImg
+    {
+        display: none;
+    }
+    #PlanWithdrawRest
+    {
+        margin-top: 0;
+    }
+    .plan-btn-group
+    {
+        width: 60px !important;
+        padding: 3px 1px !important;
+    }
+}
+@media screen and (max-width:1500px)
+{
+    #WidthdrawBgImg
+    {
+        width: 350px;
+    }
+}
+@media screen and (max-width:1300px)
+{
+    .plan-btn-group
+    {
+        width: 55px !important;
+        padding: 3px 1px !important;
+    }
+    #WithdrawHistoryViewPlan
+    {
+        margin-bottom: 5px;
+    }
+}
+@media screen and (max-width:1250px)
+{
+    .plan-btn-group
+    {
+        width: 65px !important;
+        padding: 6px 2px !important;
+    }
+    #WithdrawHistoryViewPlan
+    {
+        margin-bottom: 0;
+    }
+}
+@media screen and (max-width:1200px)
+{
+    #InvestmentPlanFeesDetails
+    {
+        border-left: none !important;
+        border-top: 1px solid rgba(var(--secondary), .3) !important;
+    }
+    #NewPlanButton
+    {
+        display: none;
+    }
+    #NewPlanButton2
+    {
+        display: block !important;
+    }
+    #WidthdrawBgImg
+    {
+        display: none;
+    }
+}
+@media screen and (max-width:1090px)
+{
+    #WithdrawHistoryViewPlan
+    {
+        margin-bottom: 8px;
+    }
+}
+@media screen and (max-width:1150px)
+{
+    .plan-btn-group
+    {
+        width: 55px !important;
+        padding: 3px 2px !important;
+    }
+}
+@media screen and (max-width:992px)
+{
+    #InvestmentPlanFeesDetails, #InvestmentPlanReturnsSummary
+    {
+        border-left: none !important;
+        border-top: none !important;
+    }
+    #PlanWithdrawImg, #PlanDepositImg
+    {
+        display: block;
+        width: 70px;
+    }
+    #PlanWithdrawRest
+    {
+        margin-top: -40px;
+    }
+    #PlanDepositRest
+    {
+        margin-top: -25px;
+    }
+    .plan-btn-group
+    {
+        width: 70px !important;
+        padding: 7px 2px !important;
+    }
+    #BreadcrumBottom
+    {
+        font-size: 12px;
+    }
+    #BreadcrumBtn
+    {
+        width: 110px;
+        padding: 2px 1px 2px 1px;
+    }
+    .app-line-breadcrumbs li + li:before
+    {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    #SupportContactInfoContainer
+    {
+        border-left: none;
+    }
+}
+@media screen and (max-width:768px)
+{
+    #InvestmentPlanExit7Days
+    {
+        margin-bottom: 10px !important;
+    }
+    .plan-action-card
+    {
+        height: 115px;
+    }
+    #FilterReturnsByNameContainer
+    {
+        margin-top: 10px;
+    }
+}
+
+@media screen and (max-width:550px)
+{
+    #InvestmentPlanName, #InvestmentAmountContainer
+    {
+        width: 100% !important;
+    }
+    .d-flex-custom
+    {
+        display: block;
+    }
+    #SupportContactForm
+    {
+        width: 100%;
+    }
+    #LoaderModal
+    {
+        width: 270px !important;
+    }
+
+    #AppLoaderSpinner
+    {
+        height: 70px !important;
+    }
+
+    #LoaderImage
+    {
+        width: 80px !important;
+    }
+}
+@media screen and (max-width:450px)
+{
+    #PlanWithdrawImg, #PlanDepositImg
+    {
+        width: 60px;
+    }
+    #PlanWithdrawRest
+    {
+        margin-top: -30px;
+    }
+    #PlanDepositRest
+    {
+        margin-top: -18px;
+    }
+    #footerNav
+    {
+        display: block !important;
+    }
+    .app-header.header-shadow
+    {
+        box-shadow: 0 1px 5px rgba(var(--primary), 0.5) !important;
+    }
+    #MainPageArea
+    {
+        margin-bottom: 70px; /* match or slightly exceed footer height */
+    }
+    #BreadcrumbLastNavText
+    {
+        display: inline-block;
+        max-width: 11ch; /* Limit to 11 characters */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: bottom;
+    }
+    .support-contact-info, .support-contact-icon
+    {
+        font-size: 14px;
+    }
+    .table-td
+    {
+        font-size: 12px !important;
+    }
+}
+@media screen and (max-width:420px)
+{
+    #BreadcrumBottom
+    {
+        font-size: 11px;
+    }
+
+    #BreadcrumBtn
+    {
+        width: 100px;
+        font-size: 12px;
+    }
+}
+@media screen and (max-width:390px)
+{
+    #BreadcrumbActBtnTxt
+    {
+        display: none !important;
+    }
+    #BreadcrumBtn
+    {
+        width: 50px;
+        font-size: 16px;
+    }
+    #SupportContactTitle
+    {
+        font-size: 22px;
+    }
+}
+@media screen and (max-width:380px)
+{
+    #PlanWithdrawImg, #PlanDepositImg
+    {
+        width: 45px;
+    }
+    #PlanWithdrawRest
+    {
+        margin-top: -15px;
+    }
+    #PlanDepositRest
+    {
+        margin-top: -5px;
+    }
+}

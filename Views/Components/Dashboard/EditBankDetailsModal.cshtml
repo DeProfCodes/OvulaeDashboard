@@ -1,0 +1,228 @@
+﻿
+<div class="modal hidden" id="EditBankDetailsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false" style="display:block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <p class="w-100 text-center fw-bold fs-18" id="EditBankDetailsTitleContainer">Edit Bank Details: <span id="EditBankDetailsTitleName"></span></p>
+                <i class="bi bi bi-x-circle-fill text-theme-clr-main modal-x-close cursor-pointer" id="EditBankDetailsModalCloseIcon"></i>
+            </div>
+            <div class="modal-body">
+                <div class="mt-3">
+                    <label for="EditBankName" class="form-label fs-16 text-ov-main fw-bold">Bank Name</label>
+                    <select class="form-select" id="EditBankName" onchange="EditBankChangeBankName()">
+                        <option value="">Please select...</option>
+                        <option value="FNB">FNB</option>
+                        <option value="Capitec">Capitec</option>
+                        <option value="Standard Bank">Standard Bank</option>
+                        <option value="ABSA">ABSA</option>
+                        <option value="Nedbank">Nedbank</option>
+                        <option value="TymeBank">TymeBank</option>
+                        <option value="African Bank">African Bank</option>
+                        <option value="Investec">Investec</option>
+                        <option value="Bidevest Bank">Bidevest Bank</option>
+                    </select>
+                    <p class="error-message fst-italic" id="EditBankNameError"></p>
+                </div>
+                <div class="mt-3">
+                    <label for="EditBankBranchCode" class="form-label fs-16 text-ov-main fw-bold">Branch Code</label>
+                    <input id="EditBankBranchCode" placeholder="Enter Account Type" class="form-control" type="text" maxlength="20">
+                    <p class="error-message fst-italic" id="EditBankBranchCodeError"></p>
+                </div>
+                <div class="mt-3">
+                    <label for="EditAccountType" class="form-label fs-16 text-ov-main fw-bold">Account Type</label>
+                    <select class="form-select" id="EditAccountType" onchange="ValidateBankDetailsFields()">
+                        <option value="">Please select...</option>
+                        <option value="Savings">Savings</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Transmission">Transmission</option>
+                        <option value="Fixed">Fixed</option>
+                        <option value="Credit Card Account">Credit</option>
+                        <option value="Subscription">Subscription</option>
+                        <option value="Bond">Bond</option>
+                    </select>
+                    <p class="error-message fst-italic" id="EditAccountTypeError"></p>
+                </div>
+                <div class="mt-3">
+                    <label for="EditAccountNumber" class="form-label fs-16 text-ov-main fw-bold">Account Number</label>
+                    <input id="EditAccountNumber" placeholder="Enter Account Number" class="form-control" type="number" maxlength="20">
+                    <p class="error-message fst-italic" id="EditAccountNumberError"></p>
+                </div>
+                <div class="main-switch main-switch-color card-body py-0 mt-2" id="SaveBankDetailsCheckContainer">
+                    <div class="swich-size switch-primary d-flex">
+                        <label for="SaveBankDetailsCheck" class="fs-16 text-ov-main fw-bold me-2 cursor-pointer">Save Bank Details</label>
+                        <input id="SaveBankDetailsCheck" class="toggle fs-12" type="checkbox">
+                        <label for="SaveBankDetailsCheck" class="fs-16 text-ov-main fw-bold"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="mx-auto">
+                    <button class="btn btn-sm btn-theme-clr-2 alert-modal-btn" id="EditBankDetailsModalCancelBtn">Cancel</button>
+                    <button class="btn btn-sm btn-primary alert-modal-btn ms-2" id="EditBankDetailsModalYesBtn">Withdraw</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show hidden" id="EditBankDetailsModalBackdrop"></div>
+
+<script>
+
+    function OpenEditBankDetailsMondal(bankName, branchCode, accountType, accountNumber)
+    {
+        FlushValidationFormat();
+
+        $("#EditBankDetailsTitleContainer").text(`Edit Bank Details: ${bankName}`);
+        $("#EditBankName").val(bankName);
+        $("#EditBankBranchCode").val(branchCode);
+        SelectAnOptionWithValue("EditAccountType", accountType);
+        $("#EditAccountNumber").val(accountNumber);
+
+        $("#EditBankName").val(bankName).prop("disabled", false);
+        $("#EditBankBranchCode").val(branchCode).prop("disabled", false);
+        $("#EditAccountType").val(accountType).prop("disabled", false);
+        $("#EditAccountNumber").val(accountNumber).prop("disabled", false);
+
+        HideShowElement("#EditBankDetailsModal", HideShow.SHOW);
+        HideShowElement("#EditBankDetailsModalBackdrop", HideShow.SHOW);
+
+        var deferred = $.Deferred();
+
+        $("#EditBankDetailsModalYesBtn").off("click").on("click", function ()
+        {
+            if (ValidateBankDetailsFields()) 
+            {
+                CloseEditBankDetailsMondal();
+                deferred.resolve(true);
+            }
+        });
+
+        $("#EditBankDetailsModalCancelBtn").off("click").on("click", function ()
+        {
+            CloseEditBankDetailsMondal();
+            deferred.resolve(false);
+        });
+
+        $("#EditBankDetailsModalCloseIcon").off("click").on("click", function ()
+        {
+            CloseEditBankDetailsMondal();
+            deferred.resolve(false);
+        });
+
+        return deferred.promise();
+    }
+
+    function OpenEditBankDetailsMondalReadOnly(bankName, branchCode, accountType, accountNumber)
+    {
+        FlushValidationFormat();
+
+        $("#EditBankDetailsTitleContainer").text("Bank Details For Withdrawal");
+        $("#EditBankName").val(bankName);
+        $("#EditBankBranchCode").val(branchCode);
+        $("#EditAccountType").val(accountType);
+        $("#EditAccountNumber").val(accountNumber);
+
+        $("#EditBankName").val(bankName).prop("disabled", true);
+        $("#EditBankBranchCode").val(branchCode).prop("disabled", true);
+        $("#EditAccountType").val(accountType).prop("disabled", true);
+        $("#EditAccountNumber").val(accountNumber).prop("disabled", true);
+
+        HideShowElement("#EditBankDetailsModal", HideShow.SHOW);
+        HideShowElement("#EditBankDetailsModalBackdrop", HideShow.SHOW);
+        HideShowElement("#SaveBankDetailsCheckContainer", HideShow.HIDE);
+        HideShowElement("#EditBankDetailsModalYesBtn", HideShow.HIDE);
+        
+        $("#EditBankDetailsModalCancelBtn").off("click").on("click", function ()
+        {
+            CloseEditBankDetailsMondal();
+        });
+
+        $("#EditBankDetailsModalCloseIcon").off("click").on("click", function ()
+        {
+            CloseEditBankDetailsMondal();
+        });
+    }
+
+    function CloseEditBankDetailsMondal()
+    {
+        HideShowElement("#EditBankDetailsModal", HideShow.HIDE);
+        HideShowElement("#EditBankDetailsModalBackdrop", HideShow.HIDE);
+    }
+    
+    function EditBankChangeBankName()
+    {
+        $("#EditBankName").removeClass("invalid-input-box");
+        $("#EditBankBranchCode").removeClass("invalid-input-box");
+        $("#EditBankNameError").text("");
+        $("#EditBankBranchCodeError").text("");
+
+        var bankName = $("#EditBankName").val();
+        var branchCode = "";
+
+        if(bankName == "FNB") branchCode = "250655";
+        if(bankName == "Capitec") branchCode = "470010";
+        if(bankName == "Standard Bank") branchCode = "051001";
+        if(bankName == "ABSA") branchCode = "632005";
+        if(bankName == "Nedbank") branchCode = "198765";
+        if(bankName == "African Bank") branchCode = "430000";
+        if(bankName == "Bidvest Bank") branchCode = "462005";
+        if(bankName == "Investec Bank") branchCode = "580105";
+        if(bankName == "TymeBank") branchCode = "678910";
+
+        $("#EditBankBranchCode").val(branchCode);
+
+        ValidateBankDetailsFields();
+    }
+
+    function FlushValidationFormat()
+    {
+        $("#EditBankName").removeClass("invalid-input-box");
+        $("#EditBankBranchCode").removeClass("invalid-input-box");
+        $("#EditAccountType").removeClass("invalid-input-box");
+        $("#EditAccountNumber").removeClass("invalid-input-box");
+
+        $("#EditBankNameError").text("");
+        $("#EditBankBranchCodeError").text("");
+        $("#EditAccountTypeError").text("");
+        $("#EditAccountNumberError").text("");
+    }
+
+    function ValidateBankDetailsFields()
+    {
+        FlushValidationFormat();
+
+        var bankName = $("#EditBankName").val();
+        var branchCode = $("#EditBankBranchCode").val();
+        var accountType = $("#EditAccountType").val();
+        var accountNo = $("#EditAccountNumber").val();
+
+        var success = true;
+
+        if(StringNullOrEmpty(bankName))
+        {
+            $("#EditBankNameError").text("*Please select Bank");
+            $("#EditBankName").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(branchCode))
+        {
+            $("#EditBankBranchCodeError").text("*Please enter Branch Code");
+            $("#EditBankBranchCode").addClass("invalid-input-box");
+            success = false;
+        }
+        if(StringNullOrEmpty(accountType))
+        {
+            $("#EditAccountTypeError").text("*Please select Account type");
+            $("#EditAccountType").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(accountNo))
+        {
+            $("#EditAccountNumberError").text("*Please enter account number");
+            $("#EditAccountNumber").addClass("invalid-input-box");
+            success = false;
+        }
+        return success;
+    }
+
+</script>

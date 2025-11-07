@@ -1,0 +1,706 @@
+﻿
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_DashboardLayout";
+}
+
+<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar closed-sidebar">
+    <!-- TOP NAV -->
+    <div class="app-header header-shadow" id="TopNavigation">
+        @{
+            await Html.RenderPartialAsync("~/Views/Layout/TopNavigation.cshtml");
+        }
+    </div>
+
+    <!-- Body Container -->
+    <div class="app-main">
+        <!-- LEFT NAV -->
+        <div class="app-sidebar sidebar-shadow hidden" id="LeftNavigation">
+
+        </div>
+
+        <!-- Main Body Container And Footer-->
+        <div class="app-main__outer theme-top-nav">
+            <!-- Main Body Pages -->
+            <div class="app-main__inner container-fluid" id="MainPageArea">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer Nav -->
+<div class="footer-nav-area hidden" id="footerNav">
+    <div class="container px-0">
+        <!-- Footer Content -->
+        <div class="footer-nav position-relative">
+            <ul class="footer-nav h-100 d-flex align-items-center justify-content-between ps-0">
+                @if (Model.UserRole == UserRoleType.Affiliate)
+                {
+                    <li>
+                        <div class="w-fit-content">
+                            <a onclick="NavigateToPage('@AppPageType.AffiliateDashboard')" class="cursor-pointer">
+                                <i class="bi bi-house-fill footer-btn-icons" id="HomeBtnIcon"></i>
+                            </a>
+                            <p class="text-center bottom-nav-btn-txt" id="HomeBtnText">Home</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="w-fit-content">
+                            <a onclick="NavigateToPage('@AppPageType.AffiliateDetails')" class="cursor-pointer">
+                                <i class="bi bi-info-circle footer-btn-icons" id="AffiliateUsersBtnIcon"></i>
+                            </a>
+                            <p class="text-center bottom-nav-btn-txt" id="AffiliateUsersBtnText">Affiliate</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="w-fit-content">
+                            <a onclick="NavigateToPage('@AppPageType.AllEarnings')" class="cursor-pointer">
+                                <i class="bi bi-graph-up-arrow footer-btn-icons" id="ReturnsBtnIcon"></i>
+                            </a>
+                            <p class="text-center bottom-nav-btn-txt" id="ReturnsBtnText">Earnings</p>
+                        </div>
+                    </li>
+                }
+                @if (Model.UserRole == UserRoleType.Admin)
+                {
+                    <li>
+                        <div class="w-fit-content">
+                            <a onclick="NavigateToPage('@AppPageType.AdminDashboard')" class="cursor-pointer">
+                                <i class="bi bi-grid-fill nav-icons footer-btn-icons" id="AdminBtnIcon"></i>
+                            </a>
+                            <p class="text-center bottom-nav-btn-txt" id="AdminBtnText">Admin</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="w-fit-content">
+                            <a onclick="NavigateToPage('@AppPageType.UsersManagement')" class="cursor-pointer">
+                                <i class="bi bi-people-fill footer-btn-icons" id="UsersBtnIcon"></i>
+                            </a>
+                            <p class="text-center bottom-nav-btn-txt" id="UsersBtnText">Users</p>
+                        </div>
+                    </li>
+                }
+                <li>
+                    <div class="w-fit-content">
+                        <a onclick="NavigateToPage('@AppPageType.AccountSettings')" class="cursor-pointer">
+                            <i class="bi bi-gear footer-btn-icons" id="SettingsBtnIcon"></i>
+                        </a>
+                        <p class="text-center bottom-nav-btn-txt" id="SettingsBtnText">Settings</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    var activeLinkId = "#AffiliateDashboardLink";
+    var activeHeaderLinkId = "#AffiliateDashboardLink";
+
+    let AllEarnings = null;
+    let ReferalEarnings = null;
+    let OtherEarnings = null;
+
+    let AllUsersDT = null;
+    let AffiliateUsersDT = null;
+    let DoctorsUsersDT = null;
+    let PremiumUsersDT = null;
+    let PendingUsersDT = null;
+
+    let EarningsChartInstance = null;
+	let earnVsNetChartInstance = null;
+
+
+    var currentPage = "@Model.StartPage";
+    var currPlanId = 0;
+
+    $(document).ready(function ()
+    {
+        BeginPageLoad();
+        MobileScreenUpdates();
+    });
+
+    $(window).on("resize", function () 
+    {
+        MobileScreenUpdates();
+    });
+
+    function MobileScreenUpdates()
+    {
+        var width = $(window).width();
+        if (width > 450 && width <= 950)
+        {
+
+        }
+        else if (width <= 450)
+        {
+            $(".view-plan-btn").text("Plan");
+        }
+        else
+        {
+            $(".view-plan-btn").text("View Plan");
+        }
+    }
+    
+    function BeginPageLoad()
+    {
+        HideShowElement("#PreLoaderModal", HideShow.HIDE);
+        HideShowElement("#PreLoaderModalBackdrop", HideShow.HIDE);
+
+        var leftNavUrl = '@Url.Action("LeftNavigation","Dashboard")';
+
+        CloseSideMenuOnMobile();
+
+        ShowAppLoader("Loading");
+
+        LoadPartialView(leftNavUrl, "", "#LeftNavigation").then(function(success)
+        {
+            if (success) 
+            {
+                HideShowElement("#LeftNavigation", HideShow.SHOW);
+                PageStartupLoad();
+            }
+            else
+            {
+                HandlePartialViewError(page);
+            }
+        });
+    }
+
+    function PageStartupLoad()
+    {
+        var fromYoco = "@Model.TransactionType" == "@TransactionType.Deposit" || "@Model.TransactionType" == "@TransactionType.DepositTopUp";
+        
+        if(fromYoco)
+        {
+            var message = "";
+            var icon = "";
+
+            if("@Model.Status" == "@StatusType.Cancelled") icon = "@AlertModalIconType.Warning";
+            if("@Model.Status" == "@StatusType.Success") icon = "@AlertModalIconType.Success";
+            if("@Model.Status" == "@StatusType.Failed") icon = "@AlertModalIconType.Error";
+
+            if("@Model.TransactionType" == "@TransactionType.Deposit")
+            {
+                if("@Model.Status" == "@StatusType.Cancelled") message = "Failed to create Investment Plan as it was cancelled.";
+                if("@Model.Status" == "@StatusType.Success") message = "Investment Plan was created Successfully.";
+                if("@Model.Status" == "@StatusType.Failed") message = "Investment Plan could not be created.";
+            }
+            else if("@Model.TransactionType" == "@TransactionType.DepositTopUp")
+            {
+                if("@Model.Status" == "@StatusType.Cancelled") message = "Failed to Top-Up Investment Plan as it was cancelled.";
+                if("@Model.Status" == "@StatusType.Success") message = "Investment Plan was Top-Up Successfully.";
+                if("@Model.Status" == "@StatusType.Failed") message = "Investment Plan Top-Up Failed.";
+            }
+            
+            ShowAlertModal("@Model.Status.GetDisplayName()", message, icon).then(function(okay)
+            {
+                if (window.location.search) 
+                {
+                    const cleanUrl = window.location.origin + window.location.pathname;
+                    history.replaceState(null, "", cleanUrl);
+                }
+                var page = '@Model.StartPage';
+                page = page != "@AppPageType.None" ? page : "@AppPageType.DepositHistory";
+                NavigateToPage(page, "@Model.PlanId");
+            });
+        }
+        else
+        {
+            NavigateToPage('@Model.StartPage', "@Model.PlanId");
+        }
+    }
+
+    function NavigateToPage(page, id, id2)
+    {
+        var url = GetPageUrl(page, id, id2);
+       
+        var title = GetPageTitle(page);
+        var loadMessage = GetNavLoaderMessage(page);
+
+        CloseSideMenuOnMobile();
+
+        ShowAppLoader(loadMessage);
+
+        LoadPartialView(url, title).then(function(success) 
+        {
+            if (success) 
+            {
+                SetActivePageCss(page, id);
+                SetBottomButtonsCss(page);
+
+                currentPage = page;
+                currPlanId = id;
+            }
+            else
+            {
+                HandlePartialViewError(page);
+            }
+        });
+
+        
+    }
+
+    function GetPageUrl(page, id, id2)
+    {
+        var url = "";
+
+        // Admin Section
+        if (page == '@AppPageType.AdminDashboard') url = '@Url.Action(AppPageType.AdminDashboard.GetDisplayName(), "Admin")'+`?userId=${id}`;
+        if (page == '@AppPageType.AdminHome') url = '@Url.Action(AppPageType.AdminHome.GetDisplayName(), "Admin")' +`?userId=${id}`;
+        if (page == '@AppPageType.AdminAllTransactions') url = '@Url.Action(AppPageType.AdminAllTransactions.GetDisplayName(), "Admin")' +`?userId=${id}`;
+        
+        // Users Section
+        if (page == '@AppPageType.UsersManagement') url = '@Url.Action(AppPageType.UsersManagement.GetDisplayName(), "Users")';
+        if (page == '@AppPageType.PremiumUsers') url = '@Url.Action(AppPageType.PremiumUsers.GetDisplayName(), "Users")';
+        if (page == '@AppPageType.AffiliateUsers') url = '@Url.Action(AppPageType.AffiliateUsers.GetDisplayName(), "Users")';
+        if (page == '@AppPageType.DoctorUsers') url = '@Url.Action(AppPageType.DoctorUsers.GetDisplayName(), "Users")';
+        if (page == '@AppPageType.PendingApprovalUsers') url = '@Url.Action(AppPageType.PendingApprovalUsers.GetDisplayName(), "Users")';
+
+        // Dashboard Section
+        // Affiliate
+        if (page == '@AppPageType.AffiliateDashboard') url = '@Url.Action(AppPageType.AffiliateDashboard.GetDisplayName(), "Affiliate")';
+        if (page == '@AppPageType.AffiliateDetails') url = '@Url.Action(AppPageType.AffiliateDetails.GetDisplayName(), "Affiliate")';
+        if (page == '@AppPageType.AffiliateTransactions') url = '@Url.Action(AppPageType.AffiliateTransactions.GetDisplayName(), "Affiliate")';
+        // Doctor
+        if (page == '@AppPageType.DoctorDashboard') url = '@Url.Action(AppPageType.DoctorDashboard.GetDisplayName(), "Doctor")';
+        if (page == '@AppPageType.DoctorDetails') url = '@Url.Action(AppPageType.DoctorDetails.GetDisplayName(), "Doctor")';
+        if (page == '@AppPageType.DoctorTransactions') url = '@Url.Action(AppPageType.DoctorTransactions.GetDisplayName(), "Doctor")';
+        if (page == '@AppPageType.DoctorPatients') url = '@Url.Action(AppPageType.DoctorPatients.GetDisplayName(), "Doctor")';
+        if (page == '@AppPageType.DoctorsPatientDetails') url = `@Url.Action(AppPageType.DoctorsPatientDetails.GetDisplayName(), "Doctor")?patientUserId=${id}`;
+
+        if (page == '@AppPageType.AllEarnings') url = '@Url.Action(AppPageType.AllEarnings.GetDisplayName(), "Earnings")';
+        if (page == '@AppPageType.ReferalEarnings') url = '@Url.Action(AppPageType.ReferalEarnings.GetDisplayName(), "Earnings")';
+        if (page == '@AppPageType.OtherEarnings') url = '@Url.Action(AppPageType.OtherEarnings.GetDisplayName(), "Earnings")';
+
+        // Transact Section
+        if (page == '@AppPageType.AllTransactions') url = '@Url.Action(AppPageType.AllTransactions.GetDisplayName(), "Transactions")';
+        if (page == '@AppPageType.DepositHistory') url = '@Url.Action(AppPageType.DepositHistory.GetDisplayName(), "Transactions")';
+        if (page == '@AppPageType.DepositTopUp') url = '@Url.Action(AppPageType.DepositTopUp.GetDisplayName(), "Transactions")';
+        if (page == '@AppPageType.WithdrawHistory') url = '@Url.Action(AppPageType.WithdrawHistory.GetDisplayName(), "Transactions")';
+        if (page == '@AppPageType.WithdrawRequest') url = '@Url.Action(AppPageType.WithdrawRequest.GetDisplayName(), "Transactions")';
+        
+        // Account Section
+        if (page == '@AppPageType.AccountSettings') url = '@Url.Action(AppPageType.AccountSettings.GetDisplayName(), "Account")';
+        if (page == '@AppPageType.Support') url = '@Url.Action(AppPageType.Support.GetDisplayName(), "Support")';
+        if (page == 'Logout') url = '@Url.Action("Logout", "Account")';
+        
+        return url;
+    }
+
+    function GetPageTitle(page)
+    {
+        var title = "";
+
+        // Admin Section
+        if (page == '@AppPageType.AdminDashboard') title = 'Dashboard';
+        if (page == '@AppPageType.AdminHome') title = 'Admin Home';
+        if (page == '@AppPageType.AdminAllTransactions') title = 'Admin All Transactions';
+        
+        // Users Section
+        if (page == '@AppPageType.UsersManagement') title = 'All Users';
+        if (page == '@AppPageType.PremiumUsers') title = 'Premium Users';
+        if (page == '@AppPageType.AffiliateUsers') title = 'Affiliate Users';
+        if (page == '@AppPageType.DoctorUsers') title = 'Doctors Users';
+        if (page == '@AppPageType.PendingApprovalUsers') title = 'Pending Users';
+
+        // Dashboard Section
+        //Affiliate
+        if (page == '@AppPageType.AffiliateDashboard') title = 'Dashboard';
+        if (page == '@AppPageType.AffiliateDetails') title = 'Affiliate Details';
+        if (page == '@AppPageType.AffiliateTransactions') title = 'Affiliate Transactions';
+        //Doctor
+        if (page == '@AppPageType.DoctorDashboard') title = 'Dashboard';
+        if (page == '@AppPageType.DoctorDetails') title = 'Doctor Details';
+        if (page == '@AppPageType.DoctorTransactions') title = 'Doctor Transactions';
+        if (page == '@AppPageType.DoctorPatients') title = 'Doctor Patients';
+        if (page == '@AppPageType.DoctorsPatientDetails') title = 'Patient Details';
+
+        if (page == '@AppPageType.AllEarnings') title = 'All Returns';
+        if (page == '@AppPageType.ReferalEarnings') title = 'Returns Returns';
+        if (page == '@AppPageType.OtherEarnings') title = 'Other Returns';
+
+        // Transact Section
+        if (page == '@AppPageType.AllTransactions') title = 'Transactions';
+        if (page == '@AppPageType.DepositHistory') title = 'Deposit History';
+        if (page == '@AppPageType.DepositTopUp') title = 'Deposit Top-Up';
+        if (page == '@AppPageType.WithdrawHistory') title = 'Withdrawal History';
+        if (page == '@AppPageType.WithdrawRequest') title = 'Withdrawal Request';
+        // Account Section
+        if (page == '@AppPageType.AccountSettings') title = 'Account Settins';
+        if (page == '@AppPageType.Support') title = 'Support';
+
+        return title;
+    }
+
+    function GetNavLoaderMessage(page)
+    {
+        var loaderMessage = "";
+
+        // Admin Section
+        if (page == '@AppPageType.AdminDashboard') loaderMessage = 'Loading Admin Dashboard';
+        if (page == '@AppPageType.AdminHome') title = 'Loading Admin Home';
+        if (page == '@AppPageType.AdminAllTransactions') title = 'Loading Admin All Transactions';
+        
+        // Users Section
+        if (page == '@AppPageType.UsersManagement') loaderMessage = 'Loading All Users';
+        if (page == '@AppPageType.PremiumUsers') loaderMessage = 'Loading Premium Users';
+        if (page == '@AppPageType.AffiliateUsers') loaderMessage = 'Loading All Affiliates';
+        if (page == '@AppPageType.DoctorUsers') loaderMessage = 'Loading Ovulae Doctors';
+        if (page == '@AppPageType.PendingApprovalUsers') loaderMessage = 'Loading Users Pending Approval';
+
+        // Dashboard Section
+        //Affiliate
+        if (page == '@AppPageType.AffiliateDashboard') loaderMessage = 'Loading Dashboard';
+        if (page == '@AppPageType.AffiliateDetails') loaderMessage = 'Loading Affiliate Profile';
+        if (page == '@AppPageType.AffiliateTransactions') loaderMessage = 'Loading Affiliate Transactions';
+        //Doctor
+        if (page == '@AppPageType.DoctorDashboard') loaderMessage = 'Loading Dashboard';
+        if (page == '@AppPageType.DoctorDetails') loaderMessage = "Loading Doctor's Profile";
+        if (page == '@AppPageType.DoctorTransactions') loaderMessage = "Loading Doctor's Transactions";
+        if (page == '@AppPageType.DoctorPatients') loaderMessage = "Loading Doctor's Patients";
+        if (page == '@AppPageType.DoctorsPatientDetails') loaderMessage = "Loading Patient Details";
+
+        if (page == '@AppPageType.AllEarnings') loaderMessage = 'Loading All Returns';
+        if (page == '@AppPageType.ReferalEarnings') loaderMessage = 'Loading Returns Returns';
+        if (page == '@AppPageType.OtherEarnings') loaderMessage = 'Loading Other Returns';
+
+        // Transact Section
+        if (page == '@AppPageType.AllTransactions') loaderMessage = 'Loading Transactions';
+        if (page == '@AppPageType.DepositHistory') loaderMessage = 'Loading Deposit History';
+        if (page == '@AppPageType.DepositTopUp') loaderMessage = 'Loading Deposit Top-Up';
+        if (page == '@AppPageType.WithdrawHistory') loaderMessage = 'Loading Withdrawal History';
+        if (page == '@AppPageType.WithdrawRequest') loaderMessage = 'Loading Withdrawal Request';
+        // Account Section
+        if (page == '@AppPageType.AccountSettings') loaderMessage = 'Loading Account Settings';
+        if (page == '@AppPageType.Support') loaderMessage = 'Loading Support';
+
+        return loaderMessage;
+    }
+
+    function SetActivePageCss(page, id)
+    {
+        var newActiveLinkId = "";
+        var newActiveHeaderLinkId = "";
+        var newLinkId = "";
+
+        var isSingleMenu = !(page == '@AppPageType.AllEarnings' || page == '@AppPageType.ReferalEarnings' || page == '@AppPageType.OtherEarnings' || 
+                            page == '@AppPageType.WithdrawHistory' || page == '@AppPageType.WithdrawRequest' || page == '@AppPageType.UsersManagement' ||
+                            page == '@AppPageType.PremiumUsers' || page == '@AppPageType.AffiliateUsers' || page == '@AppPageType.DoctorUsers' ||
+                            page == '@AppPageType.PendingApprovalUsers');
+
+        newLinkId = `#${page}Link`;
+
+        if(isSingleMenu)
+        {
+            newActiveHeaderLinkId = newLinkId;
+        }
+        else
+        {
+            if(page == '@AppPageType.AllEarnings' || page == '@AppPageType.ReferalEarnings' || page == '@AppPageType.OtherEarnings')
+            {
+                newActiveHeaderLinkId = '#ReturnsLink';
+            }
+            else if(page == '@AppPageType.DepositHistory' || page == '@AppPageType.DepositTopUp')
+            {
+                newActiveHeaderLinkId = '#DepositLink';
+            }
+            else if(page == '@AppPageType.WithdrawHistory' || page == '@AppPageType.WithdrawRequest')
+            {
+                newActiveHeaderLinkId = '#WithdrawLink';
+            }
+            else if(page == '@AppPageType.UsersManagement' || page == '@AppPageType.PremiumUsers' || page == '@AppPageType.AffiliateUsers' ||
+                    page == '@AppPageType.DoctorUsers' || page == '@AppPageType.PendingApprovalUsers')
+            {
+                newActiveHeaderLinkId = '#UsersLink';
+            }
+            newActiveLinkId = newLinkId;
+        }
+      
+        $(activeHeaderLinkId).removeClass("active-page-header");
+        $(newActiveHeaderLinkId).addClass("active-page-header");
+
+        $(activeLinkId).removeClass("active-page-child");
+        $(newActiveLinkId).addClass("active-page-child");
+
+        activeLinkId = newActiveLinkId;
+        activeHeaderLinkId = newActiveHeaderLinkId;
+    }
+
+    function SetBottomButtonsCss(page)
+    {
+        $(".footer-btn-icons").removeClass("active");
+        $(".bottom-nav-btn-txt").removeClass("active");
+
+        var btnName = "";
+
+        if(page == '@AppPageType.AffiliateDashboard') btnName = "Home";
+        if(page == '@AppPageType.ReferalEarnings' || page == '@AppPageType.AllEarnings' || page == '@AppPageType.OtherEarnings') btnName = "Earnings";
+        if(page == '@AppPageType.WithdrawRequest' || page == '@AppPageType.WithdrawHistory') btnName = "Withdraw";
+        if(page == '@AppPageType.AccountSettings' || page == '@AppPageType.AccountSettings' || page == '@AppPageType.AccountSettings') btnName = "Settings";
+        if(page == '@AppPageType.AdminDashboard') page = "Admin";
+        if(page == '@AppPageType.UsersManagement' || page == '@AppPageType.PremiumUsers' || page == '@AppPageType.AffiliateUsers' || page == '@AppPageType.PremiumUsers' || page == '@AppPageType.PendingApprovalUsers') page = "Users";
+
+        $(`#${btnName}BtnIcon`).addClass("active");
+        $(`#${btnName}BtnText`).addClass("active");
+    }
+
+    function CloseSideMenuOnMobile()
+    {
+        if (window.innerWidth <= 450)
+        {
+            ToggleSideMenu(false);
+        }
+    }
+
+    $(document).on("click", function (event) 
+    {
+        const $sidebar = $(".scrollbar-sidebar.ps");
+        const $toggleBtn = $(".mobile-toggle-nav");
+
+        // If click is outside the sidebar and not on the toggle button
+        if (!$sidebar.is(event.target) && $sidebar.has(event.target).length === 0 &&
+            !$toggleBtn.is(event.target) && $toggleBtn.has(event.target).length === 0) 
+        {
+            CloseSideMenuOnMobile();
+        }
+    });
+
+    function ToggleSideMenu(open) 
+    {
+        const $toggleBtn = $(".mobile-toggle-nav");
+        const $appContainer = $(".app-container");
+
+        if (open) 
+        {
+            $toggleBtn.addClass("is-active");
+            $appContainer.addClass("sidebar-mobile-open");
+        } 
+        else 
+        {
+            $toggleBtn.removeClass("is-active");
+            $appContainer.removeClass("sidebar-mobile-open");
+        }
+    }
+
+    function GetLoaderModalText(page)
+    {
+        var text = "";
+
+        return text;
+    }
+
+    let deferredPrompt2;
+
+    // Listen for the `beforeinstallprompt` event
+    window.addEventListener('beforeinstallprompt', (event) =>
+    {
+        // Prevent the default mini-infobar from appearing
+        event.preventDefault();
+        // Save the event for triggering it later
+        deferredPrompt2 = event;
+
+        HideShowElement(".pwa-install-btn", HideShow.SHOW);
+    });
+
+    // Function to trigger the install prompt
+    function TriggerInstall()
+    {
+        ShowAlertModal(
+            'Install App',
+            `You want to Install app in your device?`,
+            '@AlertModalIconType.Question').then(function (yes) 
+        {
+            if(yes)
+            {
+                if (deferredPrompt2)
+                {
+                    deferredPrompt2.prompt(); // Show the install prompt
+
+                    deferredPrompt2.userChoice.then((choiceResult) =>
+                    {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the PWA installation');
+                        } else {
+                            console.log('User dismissed the PWA installation');
+                        }
+
+                        // Clear the deferredPrompt variable
+                        deferredPrompt2 = null;
+                    });
+                }
+                else
+                {
+                    console.log('No install prompt available');
+                }
+            }
+        });
+    }
+
+    window.onpageshow = function (event) 
+    {
+        if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") 
+        {
+            HideAppLoader(); // restore logic for back nav
+        }
+    };
+
+    function HandlePartialViewError(page) 
+    {
+        //LogoutExplicit();
+        return;
+
+        if(page == "@AppPageType.AffiliateDashboard")
+        {
+            HideAppLoader();
+            LogoutExplicit();
+            return;
+        }
+
+        HideAppLoader();
+        NavigateToPage("@AppPageType.AffiliateDashboard");
+    }
+    
+    function Logout()
+    {
+        ShowAlertModal(
+            'Logout?',
+            `Are you sure you want to Logout?`,
+            '@AlertModalIconType.Question'
+        ).then(function (yes)
+        {
+            if(yes)
+            {
+                LogoutExplicit();
+            }
+        });
+    }
+
+    function LogoutExplicit(message)
+    {
+        message = message != null ? message : "Logging out";
+        ShowAppLoader(message);
+
+        var url = "@Url.Action("Logout", "Authentication")";
+
+        window.location = url;
+    }
+
+    let startY = 0;
+    let isPulling = false;
+    let pullThreshold = 150; // Increased threshold for intentional pull
+    let maxPullDistance = 200; // Avoid excessive scrolling issues
+    
+    document.addEventListener('touchstart', function (e) 
+    {
+        if (document.scrollingElement.scrollTop === 0) 
+        {
+            startY = e.touches[0].clientY;
+            isPulling = true;
+        }
+    });
+    
+    document.addEventListener('touchmove', function (e) 
+    {
+        if (!isPulling) 
+        {
+            return;
+        }
+    
+        const currentY = e.touches[0].clientY;
+        let pullDistance = currentY - startY;
+    
+        if (pullDistance > 0 && pullDistance < maxPullDistance) 
+        {
+            // Optional: Show a UI indicator while pulling down
+            ShowPullDownHint(pullDistance);
+        }
+    
+        if (pullDistance > pullThreshold) 
+        {
+            isPulling = false; // Stop further detection
+            ShowAppLoader("Refreshing...");
+    
+            setTimeout(() => 
+            {
+                NavigateToPage(currentPage, currPlanId);
+            }, 500);
+        }
+    });
+    
+    document.addEventListener('touchend', function () 
+    {
+        isPulling = false;
+        HidePullDownHint(); // Hide the UI hint when user stops pulling
+    });
+    
+    // Optional: Function to show pull-down hint
+    function ShowPullDownHint(distance) 
+    {
+        let hintDiv = document.getElementById('pullHint');
+    
+        if (!hintDiv) 
+        {
+            hintDiv = document.createElement('div');
+            hintDiv.id = 'pullHint';
+            hintDiv.style.position = 'fixed';
+            hintDiv.style.top = '10px';
+            hintDiv.style.left = '50%';
+            hintDiv.style.transform = 'translateX(-50%)';
+            hintDiv.style.background = 'rgba(0, 0, 0, 0.7)';
+            hintDiv.style.color = '#fff';
+            hintDiv.style.padding = '5px 10px';
+            hintDiv.style.borderRadius = '5px';
+            hintDiv.style.fontSize = '14px';
+            document.body.appendChild(hintDiv);
+        }
+    
+        hintDiv.innerText = `Pull down to refresh... (${Math.min(distance, pullThreshold)}px)`;
+    }
+    
+    // Optional: Hide pull-down hint when user stops pulling
+    function HidePullDownHint() 
+    {
+        let hintDiv = document.getElementById('pullHint');
+    
+        if (hintDiv) 
+        {
+            hintDiv.remove();
+        }
+    }
+
+    function ForceHardReloadNow()
+    {
+        ShowAppLoader(`Reloading...`);
+        if ('caches' in window)
+        {
+            caches.keys().then((names) =>
+            {
+                names.forEach((name) => caches.delete(name));
+            });
+        }
+        NavigateToPage(currentPage, currPlanId);
+    }
+
+    function ForceHardReload()
+    {
+        ShowAlertModal("Reload?", "Reload App?", "@AlertModalIconType.Question").then(function(yes)
+        {
+            if(yes)
+            {            
+                ForceHardReloadNow();
+                //location.reload(true); // Force reload
+            }
+        });
+    }
+
+</script>
+
+

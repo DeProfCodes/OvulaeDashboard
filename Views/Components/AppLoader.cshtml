@@ -1,0 +1,36 @@
+﻿
+<div class="modal hidden" id="AppLoaderModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false" style="display:block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content mx-auto w-350p">
+            <div class="modal-body text-center">
+                <div class="w-100" role="status" id="AppLoaderSpinner">
+                    <img src="~/images/app_loader.gif" id="LoaderImage"/>
+                </div>
+                <div class="mb-0 d-flex align-items-center justify-content-center mt-3 mb-2">
+                    <p class="mb-0" id="AppLoaderText">Loading Yes&nbsp;</p>
+                    <div class="spinner-grow spinner-grow-sm text-theme-clr-main wave-circle ms-3" role="status" id="LoadingCircle1"></div>
+                    <div class="spinner-grow spinner-grow-sm text-theme-clr-main ms-1 wave-circle" role="status" id="LoadingCircle2"></div>
+                    <div class="spinner-grow spinner-grow-sm text-theme-clr-main ms-1 wave-circle" role="status" id="LoadingCircle3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show hidden" id="AppLoaderModalBackdrop"></div>
+
+<script>
+
+    function ShowAppLoader(message)
+    {
+        $("#AppLoaderText").text(message);
+        HideShowElement("#AppLoaderModal", HideShow.SHOW);
+        HideShowElement("#AppLoaderModalBackdrop", HideShow.SHOW);
+    }
+
+    function HideAppLoader()
+    {
+        HideShowElement("#AppLoaderModal", HideShow.HIDE);
+        HideShowElement("#AppLoaderModalBackdrop", HideShow.HIDE);
+    }
+
+</script>

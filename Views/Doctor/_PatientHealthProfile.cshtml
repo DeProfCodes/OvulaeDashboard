@@ -1,0 +1,340 @@
+﻿@using OvulaeShared.Enums.HealthProfile
+@using OvulaeShared.ViewModel.Doctor
+@model PatientProfileViewModel
+
+@{
+    var bodyMetrics = Model.UserFullProfile.UserBodyMetrics;
+    var cycleProfile = Model.UserFullProfile.UserProfileCycle;
+    var subscription = Model.UserFullProfile.UserSubscription;
+}
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0 text-white"><i class="bi bi-heart-pulse"></i> Health Profile</h5>
+    </div>
+    <div class="card-body">
+        <!-- Row 1: Body Metrics & Subscription -->
+        <div class="row mb-4">
+            <!-- Body Metrics -->
+            <div class="col-md-6">
+                <div class="health-section">
+                    <h6><i class="bi bi-person-vitals"></i> Body Metrics</h6>
+                    @if (bodyMetrics != null)
+                    {
+						var weightUnit = string.IsNullOrEmpty(bodyMetrics.WeightUnit) ? "kg" : bodyMetrics.WeightUnit;
+						var heightUnit = string.IsNullOrEmpty(bodyMetrics.HeightUnit) ? "cm" : bodyMetrics.HeightUnit;
+
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Weight:</span>
+                                <span class="metric-value">@bodyMetrics.Weight @weightUnit</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Height:</span>
+                                <span class="metric-value">@bodyMetrics.Height @heightUnit</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Blood Group:</span>
+                                <span class="metric-value">@bodyMetrics.BloodGroup @bodyMetrics.RhFactor</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No body metrics recorded</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Subscription -->
+            <div class="col-md-6">
+                <div class="health-section">
+                    <h6><i class="bi bi-credit-card"></i> Subscription</h6>
+                    @if (subscription != null)
+                    {
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Type:</span>
+                                <span class="metric-value">@subscription.SubscriptionType</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Status:</span>
+                                <span class="metric-value"><span class="badge bg-success">@subscription.Status</span></span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Active Since:</span>
+                                <span class="metric-value">@subscription.ActiveDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No subscription data</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Comprehensive Cycle Profile -->
+        @if (cycleProfile != null)
+        {
+            <div class="health-section">
+                <h6><i class="bi bi-graph-up"></i> Cycle & Reproductive Health</h6>
+                <div class="row">
+                    <!-- Basic Cycle Information -->
+                    <div class="col-md-4">
+                        <div class="sub-section">
+                            <h7>Cycle Basics</h7>
+                            <div class="metrics-grid">
+                                @if (cycleProfile.LastPeriodDate.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Last Period:</span>
+                                        <span class="metric-value">@cycleProfile.LastPeriodDate.Value.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                }
+                                @if (cycleProfile.CycleLengthDays.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Cycle Length:</span>
+                                        <span class="metric-value">@cycleProfile.CycleLengthDays.Value days</span>
+                                    </div>
+                                }
+                                @if (cycleProfile.PeriodLengthDays.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Period Length:</span>
+                                        <span class="metric-value">@cycleProfile.PeriodLengthDays.Value days</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(cycleProfile.OvulaePrimaryGoal))
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Primary Goal:</span>
+                                        <span class="metric-value">@cycleProfile.OvulaePrimaryGoal</span>
+                                    </div>
+                                }
+                                @if (cycleProfile.TrackingStartDate.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Tracking Since:</span>
+                                        <span class="metric-value">@cycleProfile.TrackingStartDate.Value.ToString("MMM yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goals & Pregnancy -->
+                    <div class="col-md-4">
+                        <div class="sub-section">
+                            <h7>Goals & Pregnancy</h7>
+                            <div class="metrics-grid">
+                                @if (cycleProfile.AllOvulaeGoals.Any())
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">All Goals:</span>
+                                        <span class="metric-value">
+                                            @foreach (var goal in cycleProfile.AllOvulaeGoals.Take(3))
+                                            {
+                                                <span class="badge bg-info me-1 mb-1">@goal</span>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                @if (cycleProfile.IsTryingToConceive)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Trying to Conceive:</span>
+                                        <span class="metric-value"><span class="badge bg-success">Yes</span></span>
+                                    </div>
+                                }
+                                @if (cycleProfile.EstimatedDueDate.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Estimated Due Date:</span>
+                                        <span class="metric-value">@cycleProfile.EstimatedDueDate.Value.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                }
+                                @if (cycleProfile.FirstPregnancy)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">First Pregnancy:</span>
+                                        <span class="metric-value"><span class="badge bg-warning">Yes</span></span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(cycleProfile.PregnancyGoal))
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Pregnancy Goal:</span>
+                                        <span class="metric-value">@cycleProfile.PregnancyGoal</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Health Conditions & Treatments -->
+                    <div class="col-md-4">
+                        <div class="sub-section">
+                            <h7>Health & Treatments</h7>
+                            <div class="metrics-grid">
+                                @if (cycleProfile.HealthConditions.Any())
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Conditions:</span>
+                                        <span class="metric-value">
+                                            @foreach (var condition in cycleProfile.HealthConditions.Take(3))
+                                            {
+                                                <span class="badge bg-warning me-1 mb-1">@condition</span>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                @if (cycleProfile.Treatments.Any())
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Treatments:</span>
+                                        <span class="metric-value">
+                                            @foreach (var treatment in cycleProfile.Treatments.Take(3))
+                                            {
+                                                <span class="badge bg-primary me-1 mb-1">@treatment</span>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                @if (cycleProfile.BirthControlMethods.Any())
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Birth Control:</span>
+                                        <span class="metric-value">
+                                            @foreach (var method in cycleProfile.BirthControlMethods.Take(3))
+                                            {
+                                                <span class="badge bg-secondary me-1 mb-1">@method</span>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                @if (cycleProfile.Symptoms.Any())
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Common Symptoms:</span>
+                                        <span class="metric-value">
+                                            @foreach (var symptom in cycleProfile.Symptoms.Take(3))
+                                            {
+                                                <span class="badge bg-light text-dark me-1 mb-1">@symptom</span>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Additional Health Details -->
+                <div class="row mt-3">
+                    <!-- Medical History -->
+                    <div class="col-md-6">
+                        <div class="sub-section">
+                            <h7>Medical History</h7>
+                            <div class="metrics-grid">
+                                @{
+                                    var hpvVaccineStatus = cycleProfile.UsedHPVvaccine.HasValue ? (cycleProfile.UsedHPVvaccine.Value ? "Yes" : "No") : "not set";
+                                    <div class="metric-item">
+                                        <span class="metric-label">HPV Vaccine:</span>
+                                        <span class="metric-value">@hpvVaccineStatus</span>
+                                    </div>
+                                }
+                                @{
+									var useTampon = !string.IsNullOrEmpty(cycleProfile.UsingTampon) ? cycleProfile.UsingTampon : "not set";
+                                    <div class="metric-item">
+                                        <span class="metric-label">Uses Tampon:</span>
+                                        <span class="metric-value">@useTampon</span>
+                                    </div>
+                                }
+                                @{
+									var lastBreastExam = cycleProfile.LastBreastExamDate.HasValue ? cycleProfile.LastBreastExamDate.Value.ToString("MMM dd, yyyy") : "not set";
+                                    <div class="metric-item">
+                                        <span class="metric-label">Last Breast Exam Date:</span>
+                                        <span class="metric-value">@lastBreastExam</span>
+                                    </div>
+                                }
+                                @if (cycleProfile.PeriodIrregularityType != PeriodIrregularityType.None)
+                                {
+                                    var periodIregularityCss = cycleProfile.PeriodIrregularityType == PeriodIrregularityType.Regular ? "bg-success" : "bg-danger";
+                                    <div class="metric-item">
+                                        <span class="metric-label">Periods Irregularity:</span>
+                                        <span class="metric-value"><span class="badge @periodIregularityCss">@cycleProfile.PeriodIrregularityType</span></span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PCOS & Endometriosis -->
+                    <div class="col-md-6">
+                        <div class="sub-section">
+                            <h7>Specific Conditions</h7>
+                            <div class="metrics-grid">
+                                @if (cycleProfile.PCOSYears.HasValue || cycleProfile.PCOSMonths.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">PCOS Duration:</span>
+                                        <span class="metric-value">
+                                            @if (cycleProfile.PCOSYears.HasValue && cycleProfile.PCOSYears > 0)
+                                            {
+                                                <text>@cycleProfile.PCOSYears years</text>
+                                            }
+                                            @if (cycleProfile.PCOSMonths.HasValue && cycleProfile.PCOSMonths > 0)
+                                            {
+                                                <text>@cycleProfile.PCOSMonths months</text>
+                                            }
+                                            @if (cycleProfile.PCOSDiet.HasValue)
+                                            {
+                                                <text> | Diet: @(cycleProfile.PCOSDiet.Value ? "Yes" : "No")</text>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                @if (cycleProfile.EndometriosisYears.HasValue || cycleProfile.EndometriosisMonths.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Endometriosis Duration:</span>
+                                        <span class="metric-value">
+                                            @if (cycleProfile.EndometriosisYears.HasValue && cycleProfile.EndometriosisYears > 0)
+                                            {
+                                                <text>@cycleProfile.EndometriosisYears years</text>
+                                            }
+                                            @if (cycleProfile.EndometriosisMonths.HasValue && cycleProfile.EndometriosisMonths > 0)
+                                            {
+                                                <text>@cycleProfile.EndometriosisMonths months</text>
+                                            }
+                                            @if (cycleProfile.EndometriosisDiet.HasValue)
+                                            {
+                                                <text> | Diet: @(cycleProfile.EndometriosisDiet.Value ? "Yes" : "No")</text>
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                @if (cycleProfile.OvulationStartDate.HasValue)
+                                {
+                                    <div class="metric-item">
+                                        <span class="metric-label">Ovulation Start:</span>
+                                        <span class="metric-value">@cycleProfile.OvulationStartDate.Value.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No cycle profile data available
+            </div>
+        }
+    </div>
+</div>

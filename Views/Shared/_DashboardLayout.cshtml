@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <!-- Site Meta Data -->
+    <meta name="application-name" content="Ovulae Portal – Admin & Insights Dashboard">
+    <meta name="author" content="Proficient Software Solutions">
+    <meta name="keywords" content="Ovulae Portal, Admin Dashboard, Health Insights, User Analytics, Reproductive Health Platform, Ovulae Admin, Medical Reporting, Cycle Tracking Data">
+    <meta name="description"
+          content="Ovulae Portal is the administrative and analytics dashboard behind the Ovulae platform. Gain powerful insights into user behavior, health trends, and system performance in a secure and beautifully designed interface.">
+
+    <!-- Open Graph Meta Data -->
+    <meta property="og:title" content="Ovulae Portal – Monitor & Manage with Confidence">
+    <meta property="og:site_name" content="Ovulae Portal">
+    <meta property="og:url" content="https://portal.ovulae.com">
+    <meta property="og:description"
+          content="Access real-time insights, user statistics, and platform tools via the Ovulae Portal – the administrative companion to Ovulae’s women’s health ecosystem.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://portal.ovulae.com/images/icons/icon-512.png">
+    <meta property="og:image:secure_url" content="https://portal.ovulae.com/images/icons/icon-512.png">
+
+    <meta name="theme-color" content="#b5a4de">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!-- Title -->
+    <title>@ViewData["Title"]</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="~/images/icons/logo_icon.webp">
+    <link rel="apple-touch-icon" href="~/images/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/images/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="~/images/icons/icon-167x167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/icons/icon-180x180.png">
+
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="~/css/app/ovulaeTheme.css" />
+    <link rel="stylesheet" href="~/css/app/theme.css" />
+    <link rel="stylesheet" href="~/css/layouts/mainLayout.css" />
+    <link rel="stylesheet" href="~/css/layouts/customLayout.css" />
+    <link rel="stylesheet" href="~/css/layouts/theme.css" />
+    <link rel="stylesheet" href="~/css/layouts/dashboard.css" />
+    <link rel="stylesheet" href="~/css/app/site.css" />
+    <link rel="stylesheet" href="~/css/app/dashboard.css" />
+    <link rel="stylesheet" href="~/css/custom/sharedStyle.css" />
+    <link rel="stylesheet" href="~/css/custom/alertModal.css" />
+   
+
+    <!-- Crypto Library -->
+    <link rel="stylesheet" href="~/css/crypto_lib/main.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/2.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/3.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/4.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/5.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/6.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/7.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/8.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/9.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/10.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/11.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/12.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/13.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/14.css" />
+    <link rel="stylesheet" href="~/css/crypto_lib/15.css" />
+
+    <!-- CDNS -->
+    <link rel="stylesheet" href="~/css/cdn/bootstrap-icons-1.11.3/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="~/lib/datatables/datatables.min.css" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="~/manifest.json">
+
+</head>
+<body class="ltr light">
+
+    <div class="modal" id="PreLoaderModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content mx-auto" id="LoaderModal">
+                <div class="modal-body text-center">
+                    <div class="w-100" role="status" id="AppLoaderSpinner">
+                        <img src="~/images/app_loader.gif" id="LoaderImage"/>
+                    </div>
+                    <div class="mb-0 d-flex align-items-center justify-content-center mt-3 mb-2">
+                        <p class="mb-0">Loading...</p>
+                        <div class="spinner-grow spinner-grow-sm text-primary wave-circle ms-3" role="status" id="LoadingCircle1"></div>
+                        <div class="spinner-grow spinner-grow-sm text-primary ms-1 wave-circle" role="status" id="LoadingCircle2"></div>
+                        <div class="spinner-grow spinner-grow-sm text-primary ms-1 wave-circle" role="status" id="LoadingCircle3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show hidden" id="PreLoaderModalBackdrop"></div>
+
+    <div>
+        @RenderBody()
+    </div>
+    
+    @{
+        await Html.RenderPartialAsync("~/Views/Components/AppLoader.cshtml");
+        await Html.RenderPartialAsync("~/Views/Components/AlertModal.cshtml");
+    }
+
+    <div class="go-top hidden" style="display: grid; background: conic-gradient( rgba(var(--primary),1) 94%, var(--light-gray) 94%);">
+        <span class="progress-value">
+            <i class="bi bi-arrow-up"></i>
+       </span>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    
+    <!-- CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/lib/datatables/datatables.min.js"></script>
+
+    <script src="~/js/custom/customAjax.js"></script>
+    <script src="~/js/app/site.js"></script>
+    <script src="~/js/custom/enumsTypes.js"></script>
+    <script src="~/js/custom/navigations.js"></script>
+    <script src="~/js/custom/sharedFunctions.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="~/js/dashboard/dashboard.js"></script>
+    <script src="~/js/dashboard/dashboard-1.js"></script>
+
+    <!-- All JavaScript Files -->
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/slideToggle.min.js"></script>
+    <script src="~/js/internet-status.js"></script>
+    <script src="~/js/tiny-slider.js"></script>
+    <script src="~/js/venobox.min.js"></script>
+    <script src="~/js/countdown.js"></script>
+    <script src="~/js/rangeslider.min.js"></script>
+    <script src="~/js/vanilla-dataTables.min.js"></script>
+    <script src="~/js/index.js"></script>
+    <script src="~/js/imagesloaded.pkgd.min.js"></script>
+    <script src="~/js/isotope.pkgd.min.js"></script>
+    <script src="~/js/dark-rtl.js"></script>
+    <script src="~/js/active.js"></script>
+    <script src="~/js/pwa.js"></script>
+    <script src="~/js/app/site.js"></script>
+  
+
+    <!-- LIB -->
+    <script src="~/js/crt_lib/active.js"></script>
+    <script src="~/js/crt_lib/pswmeter.js"></script>
+
+
+    <script>
+
+        let BackPageURL = '';
+        let BackPage = '';
+
+        let ReturnsChartInstance;
+        let conversionChartInstance;
+
+        if ('serviceWorker' in navigator) 
+        {
+            navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log("SW registered", reg.scope))
+            .catch(err => console.error("SW registration failed", err));
+        }
+
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("~/Views/Components/AppLoader.cshtml");
+    }
+
+</body>
+</html>

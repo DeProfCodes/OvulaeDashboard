@@ -1,0 +1,204 @@
+﻿.alert-modal-btn
+{
+    width: 90px !important;
+}
+
+.alert-modal-icon-container
+{
+    margin-top: -12px;
+}
+
+.alert-modal-icon
+{
+    font-size: 80px;
+    cursor: default !important;
+}
+
+.alert-modal-icon.text-primary:hover
+{
+    color: rgba(var(--primary), 1) !important;
+}
+
+#AlertModalCloseIcon, .modal-x-close
+{
+    margin-top: -35px;
+    font-size: 15px;
+    margin-right: -5px;
+}
+
+/* Alert Modal Fade In */
+@keyframes alertModalFadeIn
+{
+    from
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Alert Modal Fade Out */
+@keyframes alertModalFadeOut
+{
+    from
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* Backdrop Fade In */
+@keyframes alertBackdropFadeIn
+{
+    from
+    {
+        opacity: 0;
+    }
+
+    to
+    {
+        opacity: 0.5;
+    }
+}
+
+/* Backdrop Fade Out */
+@keyframes alertBackdropFadeOut
+{
+    from
+    {
+        opacity: 0.5;
+    }
+
+    to
+    {
+        opacity: 0;
+    }
+}
+
+/* Modal Wrapper */
+.alert-modal
+{
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Show the modal */
+.alert-modal-show
+{
+    animation: alertModalFadeIn 0.4s ease-out forwards;
+    pointer-events: auto;
+}
+
+/* Hide the modal */
+.alert-modal-hidden
+{
+    animation: alertModalFadeOut 0.3s ease-in-out forwards;
+}
+
+/* Backdrop */
+.alert-modal-backdrop
+{
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Show the backdrop */
+.alert-modal-backdrop-show
+{
+    animation: alertBackdropFadeIn 0.3s ease-out forwards;
+}
+
+/* Hide the backdrop */
+.alert-modal-backdrop-hidden
+{
+    animation: alertBackdropFadeOut 0.3s ease-in-out forwards;
+}
+
+/* Modal Icon Animations */
+@keyframes alertSuccess
+{
+    0%
+    {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50%
+    {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+
+    100%
+    {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes alertError
+{
+    0%
+    {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50%
+    {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+
+    100%
+    {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes alertLoading
+{
+    0%
+    {
+        transform: rotate(0deg);
+    }
+
+    100%
+    {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success Icon */
+.alert-success
+{
+    animation: alertSuccess 0.5s ease-in-out forwards;
+    color: green;
+}
+
+/* Error Icon */
+.alert-error
+{
+    animation: alertError 0.5s ease-in-out forwards;
+    color: red;
+}
+
+/* Loading Icon */
+.alert-loading
+{
+    animation: alertLoading 1s linear infinite;
+    color: blue;
+}

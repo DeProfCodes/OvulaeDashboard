@@ -1,0 +1,178 @@
+﻿
+<script src="~/js/main/dashboard.js"></script>
+
+<!-- LOGO -->
+<div class="app-header__logo">
+    <div class="logo-src">
+        <img src="~/images/logos/ovulae_logo.png" id="LMSMainLogo" />
+    </div>
+    <div class="header__pane ml-auto">
+        <div>
+            <button type="button" class="hamburger close-sidebar-btn hamburger--elastic" data-class="closed-sidebar" id="SideMenuToggleBtn">
+                <span class="hamburger-box">
+                    <span class="hamburger-inner"></span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+<div class="app-header__mobile-menu">
+    <div>
+        <button type="button" class="hamburger hamburger--elastic mobile-toggle-nav">
+            <span class="hamburger-box">
+                <span class="hamburger-inner"></span>
+            </span>
+        </button>
+    </div>
+</div>
+<div class="app-header__menu">
+    
+    <a class="me-2 pwa-install-btn" data-toggle="dropdown" aria-expanded="false">
+        @* <span class="badge badge-pill badge-danger ml-0 mr-2">4</span> *@
+        <span class="icon-wrapper icon-wrapper-alt rounded-circle mobile-icons" onclick="TriggerInstall()">
+            <span class="icon-wrapper-bg bg-primary"></span>
+            <i class="icon text-primary ion-android-apps bi bi-download"></i>
+        </span>
+    </a>
+    <a class="me-2" data-toggle="dropdown" aria-expanded="false">
+        @* <span class="badge badge-pill badge-danger ml-0 mr-2">4</span> *@
+        <span class="icon-wrapper icon-wrapper-alt rounded-circle mobile-icons" onclick="ForceHardReload()">
+            <span class="icon-wrapper-bg bg-primary"></span>
+            <i class="icon text-primary ion-android-apps bi-arrow-clockwise"></i>
+        </span>
+    </a>
+    <a class="hidden" data-toggle="dropdown" aria-expanded="false" onclick="Logout()">
+        @* <span class="badge badge-pill badge-danger ml-0 mr-2">4</span> *@
+        <span class="icon-wrapper icon-wrapper-alt rounded-circle mobile-icons">
+            <span class="icon-wrapper-bg bg-primary"></span>
+            <i class="icon text-primary ion-android-apps bi bi-box-arrow-left"></i>
+        </span>
+    </a>
+    <span class="hidden">
+        <button type="button" class="btn-icon btn-icon-only btn btn-primary btn-sm mobile-toggle-header-nav">
+            <span class="btn-icon-wrapper">
+                <i class="fa fa-ellipsis-v fa-w-6 text-black"></i>
+            </span>
+        </button>
+    </span>
+</div>
+
+<!-- Rest Of Header -->
+<div class="app-header__content">
+    
+    <!-- Grid, Notifications, Profile, Right Modal Button -->
+    <div class="app-header-right">
+        <!-- Grid, Notifications -->
+        <div class="header-dots">
+            <!-- GRID ICON -->
+            <div class="dropdown hidden">
+                <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="p-0 mr-2 btn btn-link">
+                    <span class="icon-wrapper icon-wrapper-alt rounded-circle">
+                        <span class="icon-wrapper-bg bg-primary"></span>
+                        <i class="icon text-primary ion-android-apps bi bi-grid-3x3-gap-fill"></i>
+                    </span>
+                </button>
+                <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu-xl rm-pointers dropdown-menu dropdown-menu-right" id="GridDropdown">
+                    <div class="dropdown-menu-header">
+                        <div class="dropdown-menu-header-inner top-nav-grid-dropdown-header">
+                            <div class="menu-header-image" style="background-image: url('/images/main/dashboardGrid.jpg');"></div>
+                            <div class="menu-header-content text-white">
+                                <h5 class="menu-header-title">Grid Dashboard</h5>
+                                <h6 class="menu-header-subtitle">Quick Access</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-menu grid-menu-xl grid-menu-3col">
+                        <div class="no-gutters row">
+                            <div class="col-sm-6 col-xl-4">
+                                <button class="btn-icon-vertical btn-square btn-transition btn btn-outline-link">
+                                    <i class="bi bi-book-half btn-icon-wrapper btn-icon-lg mb-3 clr-green"></i> All Modules
+                                </button>
+                            </div>
+                            <div class="col-sm-6 col-xl-4">
+                                <button class="btn-icon-vertical btn-square btn-transition btn btn-outline-link">
+                                    <i class="bi bi-graph-up-arrow btn-icon-wrapper btn-icon-lg mb-3 clr-deepskyblue"> </i> All Reports
+                                </button>
+                            </div>
+                            <div class="col-sm-6 col-xl-4">
+                                <button class="btn-icon-vertical btn-square btn-transition btn btn-outline-link">
+                                    <i class="ri-pie-chart-2-fill btn-icon-wrapper btn-icon-lg mb-3 clr-orange"> </i> All Quizes
+                                </button>
+                            </div>
+                            <div class="col-sm-6 col-xl-4">
+                                <button class="btn-icon-vertical btn-square btn-transition btn btn-outline-link">
+                                    <i class="ri-presentation-fill btn-icon-wrapper btn-icon-lg mb-3 clr-deeppink"> </i> Instructors
+                                </button>
+                            </div>
+                            <div class="col-sm-6 col-xl-4">
+                                <button class="btn-icon-vertical btn-square btn-transition btn btn-outline-link">
+                                    <i class="ri-calendar-todo-fill btn-icon-wrapper btn-icon-lg mb-3 clr-blue"></i> Events
+                                </button>
+                            </div>
+                            <div class="col-sm-6 col-xl-4">
+                                <button class="btn-icon-vertical btn-square btn-transition btn btn-outline-link">
+                                    <i class="ri-questionnaire-line btn-icon-wrapper btn-icon-lg mb-3 clr-black"> </i> Help
+                                </button>
+                            </div>
+                        </div>
+                        <div class="nav-item-divider nav-item" style="margin-top:0;margin-bottom:0"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- SETTINGS ICON -->
+            <ul class="header-megamenu nav">
+                <!-- Setting Dropdown -->
+                <li class="btn-group">
+                    <a class="hidden" data-toggle="dropdown" aria-expanded="false">
+                        @* <span class="badge badge-pill badge-danger ml-0 mr-2">4</span> *@
+                        <span class="icon-wrapper icon-wrapper-alt rounded-circle">
+                            <span class="icon-wrapper-bg bg-primary"></span>
+                            <i class="icon text-primary ion-android-apps bi bi-gear"></i>
+                        </span>
+                    </a>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="rm-pointers dropdown-menu">
+                        <div class="dropdown-menu-header">
+                            <div class="dropdown-menu-header-inner bg-secondary text-white">
+                                <div class="menu-header-image opacity-5" style="background-image: url('/images/main/settings-bg.jpg');"></div>
+                                <div class="menu-header-content">
+                                    <h5 class="menu-header-title">Manage Settings</h5>
+                                    <h6 class="menu-header-subtitle">Quick settings customization</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scroll-area-xs">
+                            <div class="scrollbar-container ps">
+                                <h6 tabindex="-1" class="dropdown-header">Settings</h6>
+                                <button type="button" tabindex="0" class="dropdown-item">Personal</button>
+                                <button type="button" tabindex="0" class="dropdown-item">Notifications</button>
+                                <button type="button" tabindex="0" class="dropdown-item">Privacy</button>
+                            </div>
+                        </div>
+                        <ul class="nav flex-column">
+                            <li class="nav-item-divider nav-item"></li>
+                            <li class="nav-item-btn nav-item">
+                                <button class="btn-wide btn-shadow btn btn-danger btn-sm">Cancel</button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <span class="icon-wrapper icon-wrapper-alt rounded-circle pwa-install-btn hidden ms-2" onclick="TriggerInstall()">
+                        <span class="icon-wrapper-bg bg-primary"></span>
+                        <i class="icon text-primary ion-android-apps bi bi-download"></i>
+                    </span>
+                    <span class="icon-wrapper icon-wrapper-alt rounded-circle mobile-icons  ms-2" onclick="ForceHardReload()">
+                        <span class="icon-wrapper-bg bg-primary"></span>
+                        <i class="icon text-primary ion-android-apps bi-arrow-clockwise"></i>
+                    </span>
+                    <span class="icon-wrapper icon-wrapper-alt rounded-circle ms-2" onclick="Logout()">
+                        <span class="icon-wrapper-bg bg-primary"></span>
+                        <i class="icon text-primary ion-android-apps bi bi-box-arrow-left"></i>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/dashboard/dashboard.js"></script>
+<script src="~/js/dashboard/dashboard-1.js"></script>

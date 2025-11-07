@@ -1,0 +1,181 @@
+﻿@using OvulaeDashboard.ViewModels.Admin
+
+@model List<UserAdminAffiliateDetailsViewModel>
+
+@{
+    var planNames = new List<string>();//Model.Select(x => x.PlanName).Distinct().ToList();
+    var index = 1;
+}
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-people-fill",
+                PageType = AppPageType.DoctorUsers
+            });
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="text-primary">Doctors</h5>
+        </div>
+
+        <div class="p-0 card-body">
+            <div class="app-scroll table-responsive app-datatable-default">
+                <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">                   
+                    <table id="DoctorsUsers" class="w-100 display default-data-table align-middle table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th class="text-center">Fullname</th>
+                                <th class="text-center">Phone Number</th>
+                                <th class="text-center">Country</th>
+                                <th class="text-center">Join Date</th>
+                                <th class="text-center">Ref Code</th>
+                                <th class="text-center">
+                                    <div>
+                                        <img src="~/images/other_icons/playstore.png" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" />
+                                        <p class="fs-10 mb-0">Active | FreeTrial| Pending | Clicks</p>
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div>
+                                        <img src="~/images/other_icons/apple_icon.png" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" />
+                                        <p class="fs-10 mb-0">Active | FreeTrial | Pending | Clicks</p>
+                                    </div>
+                                </th>
+                                <th class="text-center">Earned</th>
+                                <th class="text-center">Paid</th>
+                                <th class="text-center">Pending</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="fs-12">
+                            @foreach (var user in Model)
+                            {
+                                var rowCss = (index++ % 2) == 0 ? "even" : "odd";
+                                var accountBadge = HtmlCssHelper.GetBadgeCssForAccountStatus(user.AccountStatus);
+                                var pendingCommission = user.Wallet.TotalRevenue - user.Wallet.TotalPaidOut;
+
+                                var currency = user.CountryCode == "+27" ? "R" : "$";
+
+                                <tr class="@rowCss">
+                                    <td class="table-td">@user.Email</td>
+                                    <td class="table-td text-center">@user.FullName</td>
+                                    <td class="table-td text-center">@user.PhoneNumber</td>
+                                    <td class="table-td text-center text-primary">@Html.Raw(HtmlCssHelper.GetCountryAndFlagDiv(user.CountryCode,false))</td>
+                                    <td class="table-td text-center">@user.JoinDate</td>
+                                    <td class="table-td text-center">@user.JoinCode</td>
+                                    <td class="table-td text-center">
+                                        <span class="badge bg-success">@user.AndroidStats.Active</span>
+                                        <span class="badge bg-theme-clr-2">@user.AndroidStats.FreeTrial</span>
+                                        <span class="badge bg-warning">@user.AndroidStats.Pending</span>
+                                        <span class="badge bg-secondary">@user.AndroidStats.Clicks</span>
+                                    </td>
+                                    <td class="table-td text-center">
+                                        <span class="badge bg-success">@user.IOSStats.Active</span>
+                                        <span class="badge bg-theme-clr-2">@user.IOSStats.FreeTrial</span>
+                                        <span class="badge bg-warning">@user.IOSStats.Pending</span>
+                                        <span class="badge bg-secondary">@user.IOSStats.Clicks</span>
+                                    </td>
+                                    <td class="table-td text-center"> @($"{currency}{user.Wallet.TotalRevenue}")</td>
+                                    <td class="table-td text-center">@($"{currency}{user.Wallet.TotalPaidOut}")</td>
+                                    <td class="table-td text-center">@($"{currency}{pendingCommission}")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-theme-clr-2">Edit</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Dashboard/AddOrEditUser.cshtml");
+}
+
+<script>
+
+    var planNameFilter = "";
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        PlanNameFilterText();
+        MobileScreenUpdates();
+
+        if ($('#DoctorsUsers').length)
+        {
+            // Custom filter logic
+            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex)
+            {
+                if (!planNameFilter) return true;
+
+                const planNameColumnIndex = 0;
+                const planName = data[planNameColumnIndex] || "";
+                return planName.toLowerCase().includes(planNameFilter.toLowerCase());
+            });
+
+            DoctorsUsersDT = $('#DoctorsUsers').DataTable(
+            {
+                pagingType: 'simple_numbers',
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        previous: "Previous",
+                        next: "Next"
+                    }
+                }
+            });
+        }
+    });
+
+    function FilterAllResultsByPlanName()
+    {
+        var name= $("#FilterReturnsByName").val();
+
+        planNameFilter = name;
+        if (DoctorsUsersDT)
+        {
+            DoctorsUsersDT.draw();
+        }
+    }
+
+    $(window).on("resize", function ()
+    {
+        PlanNameFilterText();
+    });
+
+    function PlanNameFilterText()
+    {
+        if ($(window).width() <= 768)
+        {
+            $("#FilterReturnsByNameTitle").text("Plan Name:");
+        }
+        else
+        {
+            $("#FilterReturnsByNameTitle").text("Filter By Plan Name:");
+        }
+    }
+
+    function AddNewUserModal()
+    {
+        OpenUserModal("", "", "", 2, "").then(function (okay)
+        {
+            if(okay)
+            {
+
+            }
+        });
+    }
+
+</script>

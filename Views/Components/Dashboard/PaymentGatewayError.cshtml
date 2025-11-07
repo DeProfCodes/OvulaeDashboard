@@ -1,0 +1,64 @@
+﻿<!-- Info Modal -->
+<div class="modal hidden" id="PaymentNoticeModal" tabindex="-1" aria-labelledby="PaymentNoticeLabel" aria-hidden="false" style="display: block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <p class="w-100 text-center fw-bold fs-18 text-danger">🚧 Online Payments Temporarily Unavailable</p>
+                <i class="bi bi-x-circle-fill text-danger modal-x-close" id="PaymentNoticeModalCloseIcon"></i>
+            </div>
+            <div class="modal-body">
+                <p class="fs-dynamic-normal">
+                    Our online payment system is currently down as we transition to a new service provider — <strong>Paystack</strong>.
+                    We are working urgently to restore access and will notify all users once payments are available again.
+                </p>
+                <p class="fs-dynamic-normal mt-1">
+                    If you prefer to get started immediately, please email <strong><a href="mailto:admin@afxtrust.com" style="color:#48bece">Admin@afxtrust.com</a></strong>.
+                    Our admin team can assist you in manually depositing funds and setting up your investment plan.
+                </p>
+                <p class="fs-dynamic-normal mt-1">
+                    Or click below to message us directly on WhatsApp for faster assistance:
+                </p>
+
+                <div class="text-center mt-3">
+                    <a href="https://wa.me/27651394584?text=Hi%20Admin%2C%20I%20need%20urgent%20assistance%20with%20a%20manual%20deposit%20and%20plan%20setup.%20Please%20respond%20quickly%20%E2%9C%85"
+                       class="btn btn-success btn-sm" target="_blank">
+                        💬 Message Admin on WhatsApp
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="mx-auto">
+                    <button class="btn btn-sm btn-danger alert-modal-btn" id="PaymentNoticeModalCancelBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade show hidden" id="PaymentNoticeModalBackdrop"></div>
+
+<script>
+                        
+    function OpenPaymentNoticeModal() 
+    {
+        HideShowElement("#PaymentNoticeModal", HideShow.SHOW);
+        HideShowElement("#PaymentNoticeModalBackdrop", HideShow.SHOW);
+
+        $("#PaymentNoticeModalCancelBtn").off("click").on("click", function () 
+        {
+            ClosePaymentNoticeModal();
+        });
+
+        $("#PaymentNoticeModalCloseIcon").off("click").on("click", function () 
+        {
+            ClosePaymentNoticeModal();
+        });
+    }
+
+    function ClosePaymentNoticeModal() 
+    {
+        HideShowElement("#PaymentNoticeModal", HideShow.HIDE);
+        HideShowElement("#PaymentNoticeModalBackdrop", HideShow.HIDE);
+    }
+
+</script>

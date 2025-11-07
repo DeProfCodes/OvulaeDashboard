@@ -1,0 +1,119 @@
+﻿
+#Logo
+{
+    width: 250px;
+}
+#Preloader
+{
+    width: 100px;
+}
+#CompanyImg
+{
+    width: 480px;
+}
+#ApexImg
+{
+    width:610px;
+}
+.float-icons
+{
+    width: 70px !important;
+    opacity: 0.4;
+}
+.serivces-icons
+{
+    width:130px;
+    height:130px;
+    object-fit:contain;
+}
+.slide-images
+{
+    width:600px;
+    height: 400px;
+}
+.slide-images2
+{
+    width: 600px;
+    height: 400px;
+    object-fit:contain;
+}
+.nav-links:hover
+{
+    color:var(--theme-blue);
+}
+html
+{
+    scroll-behavior: smooth;
+}
+.visible
+{
+    display:block !important;
+}
+/* Carousel control arrows */
+.carousel-control-prev-icon,
+.carousel-control-next-icon
+{
+    background-color: gold; /* Sets the arrow color to gold */
+    border-radius: 50%; /* Makes the arrows round if desired */
+}
+
+/* Carousel indicators */
+.carousel-indicators button
+{
+    background-color: white; /* Default indicator color */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%; /* Makes the indicators round */
+    opacity: 1; /* Ensures solid color */
+}
+
+.carousel-indicators .active
+{
+    background-color: gold; /* Active indicator color */
+}
+
+.modal-preview-btn
+{
+    background:gold;
+    color:black;
+    opacity:0.7;
+    border-color:black;
+    margin-top:-145px;
+}
+.carousel-btn
+{
+    background-color:white !important;
+}
+.carousel-btn.active
+{
+    background-color: gold !important;
+}
+
+body
+{
+    background-image: radial-gradient(at center center, #333644 0%, #021623 70%);
+}
+
+/* For WebKit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar
+{
+    width: 8px;
+}
+
+::-webkit-scrollbar-track
+{
+    background: #0d2e3a; /* light grey */
+}
+
+::-webkit-scrollbar-thumb
+{
+    background-color: rgba(var(--primary), 0.8) !important; /* bootstrap blue or your custom blue */
+    border-radius: 10px;
+    border: 2px solid transparent; /* Optional for padding effect */
+}
+
+/* Optional: on hover */
+::-webkit-scrollbar-thumb:hover
+{
+    background-color: rgba(var(--primary), 1) !important;
+}

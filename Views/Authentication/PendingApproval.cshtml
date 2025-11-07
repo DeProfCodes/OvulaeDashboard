@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Pending Approval";
+    Layout = "_DashboardLayout";
+}
+
+<link rel="stylesheet" href="~/css/app/account.css" />
+
+<div class="login-wrapper px-4">
+    <div class="login-card">
+
+        <!-- Logo -->
+        <div class="text-center mb-3 cursor-pointer" onclick="HomePage()">
+            <img src="~/images/logos/logo_main.webp" alt="Logo" style="height: 100px;" />
+        </div>
+
+        <!-- Approval Message -->
+        <h4 class="text-center mb-3 mt-3 text-theme-clr-main">Account Not Yet Approved</h4>
+        <p class="text-center fs-15 text-muted mb-3">
+            Your registration was successful, but an administrator must approve your account before access is granted.
+        </p>
+
+        <div class="text-center">
+            <i class="bi bi-shield-lock-fill fs-1 text-theme-clr-main"></i>
+            <p class="mt-3 fs-14">
+                You’ll receive an email once your account is approved.<br />
+                If you require urgent access, please contact support:
+            </p>
+            <p class="fw-semibold app-blue-clr fs-15">
+                <a href="mailto:support@ovulae.com">support@ovulae.com</a>
+            </p>
+        </div>
+
+        <div class="text-center mt-4 fs-14">
+            <p class="mb-0">
+                Already approved? <a asp-action="Login" class="text-theme-clr-2 fw-semibold text-decoration-none">Login here</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+
+    $(document).ready(function ()
+    {
+        HideShowElement("#PreLoaderModal", HideShow.HIDE);
+        HideShowElement("#PreLoaderModalBackdrop", HideShow.HIDE);
+    });
+
+</script>

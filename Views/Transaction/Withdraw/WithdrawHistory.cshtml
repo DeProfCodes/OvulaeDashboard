@@ -1,0 +1,146 @@
+﻿@model List<TransactionHistoryViewModel>
+
+@{
+    var index = 1;
+}
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-bank",
+                PageType = AppPageType.WithdrawHistory,
+                ActionButton = new BreadcrumbButton
+                {
+                    ButtonText = "Withdraw",
+                    ButtonIconCss = "bi-bank",
+                    Page = AppPageType.WithdrawRequest
+                }
+            });
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="text-primary">Withdrawal Transactions</h5>
+        </div>
+
+        <div class="p-0 card-body">
+            <div class="app-scroll table-responsive app-datatable-default">
+                <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">
+                    <!-- Table -->
+                    <table id="WithdrawHistory" class="w-100 display default-data-table align-middle table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Withdrawal ID</th>
+                                <th class="text-center">Bank Details</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Request Date</th>
+                                <th class="text-center">Response Date</th>
+                                <th class="text-center">Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="fs-12">
+                            @foreach (var withdraw in Model)
+                            {
+                                var rowCss = (index++ % 2) == 0 ? "even" : "odd";
+                                var statusBadge = HtmlCssHelper.GetBadgeCssForStatus(withdraw.StatusType);
+                                var bankInfo = withdraw.BankDetails;
+                                var responseDate = (withdraw.StatusType == StatusType.Paid) ? HtmlCssHelper.GetTimeZonedTime(withdraw.TransactionApprovalDate) : "n.a";
+
+                                <tr class="@rowCss">
+                                    <td class="table-td text-center">@withdraw.TransactionId</td>
+                                    <td class="table-td text-center">
+                                        <button class="btn btn-sm btn-theme-clr-2 btn-x-sm"
+                                        onclick="OpenWithdrawBankDetails('@bankInfo.BankName','@bankInfo.BranchCode', '@bankInfo.AccountType', '@bankInfo.AccountNumber')">
+                                            View
+                                        </button>
+                                    </td>
+                                    <td class="table-td text-danger text-center fw-bold">@HtmlCssHelper.GetFormatedAmount(withdraw.Amount, "-")</td>
+                                    <td class="table-td text-center">@HtmlCssHelper.GetTimeZonedTime(withdraw.TransactionDate)</td>
+                                    <td class="table-td text-center">@responseDate</td>
+                                    <td class="table-td text-center"><span class="badge badge-@statusBadge">@withdraw.StatusType.GetDisplayShortName()</span></td>
+                                    <td>
+                                        @if (withdraw.StatusType == StatusType.Pending)
+                                        {
+                                            <button class="btn btn-sm btn-outline-danger btn-x-sm ms-1" onclick="CancelWithdraw('@withdraw.TransactionId', '@withdraw.Amount')">Cancel</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Dashboard/EditBankDetailsModal.cshtml");
+}
+
+<script>
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        MobileScreenUpdates();
+
+        $('#WithdrawHistory').DataTable({
+            pagingType: 'simple_numbers', 
+            lengthMenu: [10, 25, 50, 100], // Matches your options
+            order: [], // 🔥 disables default sort
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                paginate: {
+                    previous: "Previous",
+                    next: "Next"
+                }
+            }
+        });
+    });
+
+    function CancelWithdraw(withdrawalId, amount)
+    {
+        ShowAlertModal(
+            'Cancel Withdrawal Request',
+            `Are you sure you want to cancel withdrawal request of Amount = R${FormatMoney(amount)}?`,
+            '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            if(confirmed)
+            {
+                ShowAppLoader("Cancelling Withdrawal Request...");
+
+                var url = "@Url.Action("CancelWithdrawRequest", "Transactions")";
+
+                var payload =
+                {
+                    withdrawalId: withdrawalId,
+                }
+
+                PerformAction(url, "POST", payload, CancellWithdrawalCallback);
+            }
+        });
+    }
+
+    function CancellWithdrawalCallback(success, response)
+    {
+        HideAppLoader();
+        if (success)
+        {
+            ShowAlertModal("Successful", "You have successfully cancelled this withdrawal request", "@AlertModalIconType.Success").then(function(okay)
+            {
+                NavigateToPage(response.page);
+            });   
+        }
+    }
+
+    function OpenWithdrawBankDetails(bankName, branchCode, accountType, accountNumber)
+    {
+        OpenEditBankDetailsMondalReadOnly(bankName, branchCode, accountType, accountNumber);
+    }
+
+</script>

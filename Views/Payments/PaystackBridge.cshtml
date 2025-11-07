@@ -1,0 +1,16 @@
+﻿<!doctype html>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<body style="font-family: -apple-system, Roboto, Segoe UI, sans-serif; padding: 24px;">
+    <p>Finishing up…</p>
+    <a id="open" href="#">Return to Ovulae</a>
+    <script>
+        (function () {
+          var p = new URLSearchParams(location.search);
+          var ref = p.get('reference') || p.get('trxref') || '';
+          var deep = 'ovulae://paystack/callback' + (ref ? ('?reference=' + encodeURIComponent(ref)) : '');
+          document.getElementById('open').href = deep;
+          // try auto
+          location.replace(deep);
+        })();
+    </script>
+</body>

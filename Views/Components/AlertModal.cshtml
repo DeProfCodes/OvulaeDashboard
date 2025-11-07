@@ -1,0 +1,139 @@
+﻿
+<div class="modal hidden" id="AlertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false" style="display:block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <p class="w-100 text-center fw-bold fs-18" id="AlertModalTitle">Are you sure?</p>
+                <i class="bi bi bi-x-circle-fill text-theme-clr-main cursor-pointer" id="AlertModalCloseIcon"></i>
+            </div>
+            <div class="modal-body text-center p-0">
+                <div class="alert-modal-icon-container">
+                    <i class="bi alert-modal-icon" id="AlertModalIcon"></i>
+                </div>
+                <div style="margin-top: -10px;">
+                    <p class="mb-2 fs-14 px-2" id="ShowAlertModalMainText">Loading Yes&nbsp;</p>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="mx-auto">
+                    <button class="btn btn-sm btn-outline-theme-clr-main alert-modal-btn" id="AlertModalCancelBtn">Cancel</button>
+                    <button class="btn btn-sm btn-theme-clr-2 alert-modal-btn ms-2" id="AlertModalYesBtn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show hidden" id="AlertModalBackdrop"></div>
+
+<script>
+
+    function ShowAlertModal(title, message, icon)
+    {
+        if (alertModalCloseTimeout)
+        {
+            clearTimeout(alertModalCloseTimeout);
+            alertModalCloseTimeout = null;
+        }
+
+        HideShowElement("#AlertModal", HideShow.SHOW);
+        HideShowElement("#AlertModalBackdrop", HideShow.SHOW);
+        $("#AlertModal").removeClass("alert-modal-hidden").addClass("alert-modal-show");
+        $("#AlertModalBackdrop").removeClass("alert-modal-backdrop-hidden").addClass("alert-modal-backdrop-show");
+
+        SetControlsForIconType(icon)
+
+        $("#AlertModalTitle").text(title);
+        $("#ShowAlertModalMainText").html(message);
+
+        FlushAllIcons();
+        $("#AlertModalIcon").addClass(GetAlertModalIconCss(icon));
+
+        var deferred = $.Deferred();
+
+        $("#AlertModalYesBtn").off("click").on("click", function ()
+        {
+            CloseAlertModal();
+            deferred.resolve(true);  
+        });
+
+        $("#AlertModalCancelBtn").off("click").on("click", function ()
+        {
+            CloseAlertModal();
+            deferred.resolve(false); 
+        });
+
+        $("#AlertModalCloseIcon").off("click").on("click", function ()
+        {
+            CloseAlertModal();
+            deferred.resolve(false);
+        });
+
+        return deferred.promise(); 
+    }
+
+    var alertModalCloseTimeout = null;
+
+    function CloseAlertModal() 
+    {
+        var modal = $("#AlertModal");
+        var backdrop = $("#AlertModalBackdrop");
+
+        modal.removeClass("alert-modal-show").addClass("alert-modal-hidden");
+        backdrop.removeClass("alert-modal-backdrop-show").addClass("alert-modal-backdrop-hidden");
+
+        if (alertModalCloseTimeout)
+        {
+            clearTimeout(alertModalCloseTimeout);
+        }
+
+        alertModalCloseTimeout = setTimeout(() =>
+        {
+            modal.addClass("alert-modal-hidden");
+            backdrop.addClass("alert-modal-backdrop-hidden");
+
+            HideShowElement("#AlertModal", HideShow.HIDE);
+            HideShowElement("#AlertModalBackdrop", HideShow.HIDE);
+
+            alertModalCloseTimeout = null; // reset after hiding
+        }, 300);
+    }
+
+    function GetAlertModalIconCss(icon)
+    {
+        var iconCss = "";
+
+        if(icon == "@AlertModalIconType.Question") iconCss = "bi-question-circle text-theme-clr-main";
+        if(icon == "@AlertModalIconType.Information") iconCss = "bi-info-circle text-theme-clr-main";
+        if(icon == "@AlertModalIconType.Error") iconCss = "bi-x-circle text-theme-clr-main";
+        if(icon == "@AlertModalIconType.Warning") iconCss = "bi-exclamation-triangle text-theme-clr-main";
+        if(icon == "@AlertModalIconType.Success") iconCss = "bi-check-circle text-theme-clr-main";
+
+        return iconCss;
+    }
+
+    function SetControlsForIconType(icon)
+    {
+        if(icon == "@AlertModalIconType.Question")
+        {
+            HideShowElement("#AlertModalYesBtn", HideShow.SHOW);
+            HideShowElement("#AlertModalCancelBtn", HideShow.SHOW);
+        }
+        else
+        {
+            HideShowElement("#AlertModalYesBtn", HideShow.SHOW);
+            HideShowElement("#AlertModalCancelBtn", HideShow.HIDE);
+
+            $("#AlertModalYesBtn").text("Ok");
+        }
+    }
+
+    function FlushAllIcons()
+    {
+        $("#AlertModalIcon").removeClass("bi-question-circle text-primary");
+        $("#AlertModalIcon").removeClass("bi-info-circle text-info");
+        $("#AlertModalIcon").removeClass("bi-x-circle text-danger");
+        $("#AlertModalIcon").removeClass("bi-exclamation-triangle text-warning");
+        $("#AlertModalIcon").removeClass("bi-check-circle text-success");
+    }
+
+</script>

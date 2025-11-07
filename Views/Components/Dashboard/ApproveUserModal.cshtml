@@ -1,0 +1,106 @@
+﻿
+<div class="modal hidden" id="UserApprovalModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false" style="display:block;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <p class="w-100 text-center fw-bold fs-18">Approve User</p>
+                <i class="bi bi bi-x-circle-fill text-theme-clr-main modal-x-close cursor-pointer" id="UserModalCloseIcon"></i>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <p class="fs-14">You are about to approve 
+                        <span class ="text-theme-clr-main fw-bold fs-18 mx-1" id="UserModalFullname"></span>
+                        to Ovulae Portal.
+                    </p>
+                    <p class="fs-12 mt-3 fst-italic text-theme-clr-2">*Please select user ROLE (Affilate/Doctor) to approve, then we will send them an email to welcome them to our system.</p>
+                </div>
+                <div class="mt-3 d-flex w-fit-content mx-auto mb-4">
+                    <label for="UserModalRole" class="form-label fs-16 text-theme-clr-main fw-bold mb-0" style="padding-top:2px">Role</label>
+                    <div class="ms-3">
+                        <select class="form-select-sm w-150p" id="UserModalRole">
+                            <option value="">Please select...</option>
+                            <option value="@UserRoleType.Doctor">Doctor</option>
+                            <option value="@UserRoleType.Affiliate">Affiliate</option>
+                        </select>
+                        <p class="error-message fst-italic" id="UserModalRoleError"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="mx-auto">
+                    <button class="btn btn-sm btn-outline-theme-clr-main" id="UserModalCancelBtn">CANCEL</button>
+                    <button class="btn btn-sm btn-primary ms-2" id="UserModalYesBtn">APPROVE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show hidden" id="UserModalBackdrop"></div>
+
+<script>
+
+    function OpenApproveUserModal(fullname, role)
+    {
+        FlushUserModalValidationFormat();
+
+        $("#UserModalFullname").text(fullname);
+        SelectAnOptionWithValue("UserModalRole", role);
+        
+        HideShowElement("#UserApprovalModal", HideShow.SHOW);
+        HideShowElement("#UserModalBackdrop", HideShow.SHOW);
+
+        var deferred = $.Deferred();
+
+        $("#UserModalYesBtn").off("click").on("click", function ()
+        {
+            if (ValidateUserModalFields())
+            {
+                CloseUserModal();
+                deferred.resolve(true);
+            }
+        });
+
+        $("#UserModalCancelBtn").off("click").on("click", function ()
+        {
+            CloseUserModal();
+            deferred.resolve(false);
+        });
+
+        $("#UserModalCloseIcon").off("click").on("click", function ()
+        {
+            CloseUserModal();
+            deferred.resolve(false);
+        });
+
+        return deferred.promise();
+    }
+
+    function CloseUserModal()
+    {
+        HideShowElement("#UserApprovalModal", HideShow.HIDE);
+        HideShowElement("#UserModalBackdrop", HideShow.HIDE);
+    }
+
+    function FlushUserModalValidationFormat()
+    {
+        $("#UserModalRole").removeClass("invalid-input-box");    
+        $("#UserModalRoleError").text("");
+    }
+
+    function ValidateUserModalFields()
+    {
+        FlushUserModalValidationFormat();
+
+        var role = $("#UserModalRole").val();
+
+        var success = true;
+        if(StringNullOrEmpty(role))
+        {
+            $("#UserModalRoleError").text("*Please enter user role");
+            $("#UserModalRole").addClass("invalid-input-box");
+            success = false;
+        }
+        return success;
+    }
+
+</script>

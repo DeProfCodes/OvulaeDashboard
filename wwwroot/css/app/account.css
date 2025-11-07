@@ -1,0 +1,71 @@
+﻿body, html
+{
+    height: 100%;
+    margin: 0;
+}
+
+.login-wrapper
+{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fc; /* light theme bg */
+}
+
+.login-card
+{
+    max-width: 450px;
+    width: 100%;
+    padding: 2rem 2rem 2.5rem 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
+}
+
+.login-card .form-control
+{
+    height: 44px;
+    font-size: 14px;
+}
+
+.typing-container h2
+{
+    font-size: 20px;
+    font-weight: 600;
+    color: #6c757d;
+    text-align: center;
+    min-height: 28px;
+}
+
+.theme-btn-1
+{
+    background-color: #6a5acd;
+    border: none;
+    font-weight: 600;
+}
+
+.theme-btn-1:hover
+{
+    background-color: #574dcf;
+}
+
+.error-message
+{
+    color: #dc3545;
+    font-size: 13px;
+}
+
+#countryList
+{
+    border-color: var(--theme-clr-main);
+    height: 250px;
+    overflow: auto;
+}
+
+.form-control:focus
+{
+    border-color: var(--theme-clr-main) !important;
+    box-shadow: 0 0 0 .25rem rgba(181, 164, 222, .25) !important;
+}
+}

@@ -1,0 +1,141 @@
+﻿@model DashboardViewModel
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-house",
+                PageType = AppPageType.AdminHome
+            });
+
+    int transCount = 0;
+    int ReturnsCount = 0;
+}
+<div class="mb-3">
+    <h2 class="text-primary">Dashboard For : @Model.Fullname</h2>
+</div>
+<div class="row">
+    <!-- Overview Cards -->
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card currency-data-card card-box-shadow">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-1">Total Invested</h6>
+                <h3 class="text-primary">@HtmlCssHelper.GetFormatedAmount(Model.TotalInvested)</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card currency-data-card card-box-shadow">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-1">Total Returns</h6>
+                <h3 class="text-success">@HtmlCssHelper.GetFormatedAmount(Model.TotalReturns)</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card currency-data-card card-box-shadow">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-1">Active Plans</h6>
+                <h3 class="text-primary">@Model.ActivePlans</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card currency-data-card card-box-shadow">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-1">Total Withdrawals</h6>
+                <h3 class="text-danger">@HtmlCssHelper.GetFormatedAmount(Model.TotalWithdrawals)</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-6 col-sm-12 mb-3">
+        
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <button class="btn btn-outline-success w-100" onclick="NavigateToPage('@AppPageType.WithdrawRequest')">
+            <i class="bi bi-bank me-2"></i> Request Withdrawal
+        </button>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card card-box-shadow">
+            <div class="card-body">
+                <h5 class="mb-3">Recent Transactions</h5>
+                <ul class="transaction-list">
+                    @foreach (var trans in Model.Transactions)
+                    {
+                        var moneyCss = trans.TransactionType == TransactionType.Withdrawal ? "text-danger" : "text-success";
+                        var sign = trans.TransactionType == TransactionType.Withdrawal ? "-" : "+";
+
+                        <li class="transaction-list-item">
+                            <div class="transaction-list-content">
+                                <h6 class="mb-0">@trans.TransactionType.GetDisplayName()</h6>
+                                <p class="mb-0 text-secondary fs-12 fst-italic">@HtmlCssHelper.GetTimeZonedTime(trans.TransactionDate)</p>
+                            </div>
+                            <div>
+                                <p class="mb-0 @moneyCss fw-bold">@HtmlCssHelper.GetFormatedAmount(trans.Amount, sign)</p>
+                            </div>
+                        </li>
+
+                        transCount++;
+                        if (transCount == 3) break;
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Returns -->
+    <div class="col-lg-6 mb-4">
+        <div class="card card-box-shadow">
+            <div class="card-body">
+                <h5 class="mb-3">Recent Returns</h5>
+                <ul class="transaction-list">
+                    @foreach (var gains in Model.Returns)
+                    {
+                        <li class="transaction-list-item">
+                            <div class="transaction-list-content">
+                                <h6 class="mb-0">Return</h6>
+                                <p class="mb-0 text-secondary fs-12 fst-italic">@gains.EarningsDate.ToString("dd/MM/yyyy")</p>
+                            </div>
+                            <div>
+                                <p class="mb-0 text-success fw-bold">@HtmlCssHelper.GetFormatedAmount(gains.Earnings)</p>
+                            </div>
+                        </li>
+
+                        ReturnsCount++;
+                        if (ReturnsCount == 3) break;
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Returns Snapshot Placeholder -->
+<div class="row mb-4 hidden">
+    <div class="col-12">
+        <div class="card card-box-shadow">
+            <div class="card-body">
+                <h5 class="mb-3">Returns Snapshot</h5>
+                <div class="text-center text-muted">[Graph or Chart Goes Here]</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+    });
+
+</script>

@@ -1,0 +1,530 @@
+﻿@using OvulaeDashboard.ViewModels.Doctor
+@using OvulaeShared.Enums.App
+@using OvulaeShared.Models.Pregnancy
+@model PregnancyLogsViewModel
+
+@{
+    List<PregnancyLogEntryItem> pregnancyLogs = Model.Logs;
+	var patientUserId = Model.PatientUserId;
+    string trackerType = "pregnancy";
+}
+
+<div class="card module-card @(ViewBag.IsCurrent == true ? "current-tracker" : "")">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0 text-white"><i class="bi bi-gender-female"></i> Pregnancy Tracker</h5>
+        <div class="pagination-info" id="@(trackerType)-pagination-info">
+            <small>Loading...</small>
+        </div>
+    </div>
+    <div class="card-body" id="@(trackerType)-card-body">
+        @if (!pregnancyLogs.Any())
+        {
+            <p class="text-muted">No pregnancy logs available</p>
+        }
+        else
+        {
+            foreach(var log in pregnancyLogs.OrderByDescending(x => x.LogDate))
+            {
+                <div class="log-entry @(trackerType)-log-entry">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>Week @log.Week, Day @log.DayOfWeekNo</strong>
+                            <small class="text-muted ms-2">@log.LogDate.ToString("dd MMM yyyy, dddd")</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary @(trackerType)-toggle-details-btn" data-log-id="@log.EntryId">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+
+                    <!-- Minimal Bars Only -->
+                    <div class="compact-2col-ratings mt-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Mood: @log.MoodsRating</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.MoodsRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.MoodsRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Energy: @log.EnergyRating</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.EnergyRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.EnergyRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Sleep: @log.SleepRating</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.SleepRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.SleepRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Appetite: @log.AppetiteRating</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.AppetiteRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.AppetiteRating);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Baby Movements: @log.BabyMovementsRating</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.BabyMovementsRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.BabyMovementsRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Stress: @(log.StressRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @((log.StressRating) * 10)%; background: @HtmlCssHelper.GetColorForRating(log.StressRating);"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Comfort: @(log.SymptomsRating)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @((log.SymptomsRating) * 10)%; background: @HtmlCssHelper.GetColorForRating(log.SymptomsRating)"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Activities: @log.ActivitiesRating</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @(log.ActivitiesRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.ActivitiesRating)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        @if (log.Moods.Any())
+                        {
+                            <div class="mb-2">
+                                @foreach (var mood in log.Moods)
+                                {
+                                    <span class="symptom-badge bg-theme-clr-main text-black ">@mood</span>
+                                }
+                            </div>
+                        }
+
+                        @if (log.Symptoms.Any())
+                        {
+                            <div class="mb-2">
+                                @foreach (var symptom in log.Symptoms)
+                                {
+                                    <span class="symptom-badge bg-theme-clr-3 text-white">@symptom</span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div id="log-details-preg-@log.EntryId" class="d-none mt-3">
+                        
+                        <!-- Detailed Information -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-section">
+                                    <h6>Physical Health</h6>
+                                    <p><strong>Energy:</strong> @log.EnergyLevel</p>
+                                    <p><strong>Sleep:</strong> @log.SleepQuality</p>
+                                    <p><strong>Baby Movements:</strong> @log.MovementFrequency</p>
+                                    <p><strong>Appetite:</strong> @log.AppetiteLevel</p>
+                                    @if (log.BloodPressureDaily == true)
+                                    {
+                                        <p><strong>Blood Pressure:</strong> @log.BloodPressureReadings</p>
+                                    }
+                                </div>
+
+                                @if (log.Activities.Any())
+                                {
+                                    <div class="detail-section">
+                                        <h6>Activities</h6>
+                                        @foreach (var activity in log.Activities)
+                                        {
+                                            <span class="badge bg-light text-dark mb-2">@activity</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-section">
+                                    <h6>Mental & Emotional</h6>
+                                    <p><strong>Stress:</strong> @log.StressLevel</p>
+                                    <p><strong>Mood Notes:</strong> @log.MoodsNotes</p>
+                                    @if (!string.IsNullOrEmpty(log.StressNotes))
+                                    {
+                                        <p><strong>Stress Notes:</strong> @log.StressNotes</p>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(log.Reflection))
+                                {
+                                    <div class="detail-section">
+                                        <h6>Daily Reflection</h6>
+                                        <div class="reflection-box">
+                                            <i class="bi bi-chat-quote text-muted me-2"></i>
+                                            @log.Reflection
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (log.Cravings.Any())
+                                {
+                                    <div class="detail-section">
+                                        <h6>Cravings</h6>
+                                        @foreach (var craving in log.Cravings)
+                                        {
+                                            <span class="badge bg-success mb-2">@craving</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.CravingsNotes))
+                                        {
+                                            <p class="mt-1"><small>@log.CravingsNotes</small></p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Additional Notes Sections -->
+                        <div class="row mt-2">
+                            @if (!string.IsNullOrEmpty(log.SymptomsNotes))
+                            {
+                                <div class="col-md-6">
+                                    <div class="detail-section">
+                                        <h6>Symptoms Notes</h6>
+                                        <p>@log.SymptomsNotes</p>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(log.EnergyNotes))
+                            {
+                                <div class="col-md-6">
+                                    <div class="detail-section">
+                                        <h6>Energy Notes</h6>
+                                        <p>@log.EnergyNotes</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Medical Alerts -->
+                        @if (log.ExperiencedBleedingOrLeakage || log.HadUnusualDiscomfort || log.UTIOften == true)
+                        {
+                            <div class="alert alert-warning mt-3">
+                                <h6><i class="bi bi-exclamation-triangle"></i> Medical Notes</h6>
+                                @if (log.ExperiencedBleedingOrLeakage)
+                                {
+                                    <p><strong>Bleeding/Leakage:</strong> @log.BleedingDetails</p>
+                                    <p>@log.BleedingNotes</p>
+                                }
+                                @if (log.HadUnusualDiscomfort)
+                                {
+                                    <p><strong>Discomfort:</strong> @string.Join(", ", log.DiscomfortDescription)</p>
+                                    <p>@log.DiscomfortNotes</p>
+                                }
+                                @if (log.UTIOften == true)
+                                {
+                                    <p><strong>UTI Concern:</strong> Frequent urinary tract infections noted</p>
+                                }
+                            </div>
+                        }
+
+
+                        <!-- Doctor's Notes Section -->
+                        <div class="doctors-notes-section mt-3 border-top pt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-clipboard-plus text-primary"></i> Doctor's Notes
+                                </h6>
+                                <button class="btn btn-sm btn-outline-secondary @(trackerType)-@(trackerType)-edit-notes-btn"
+                                        data-log-id="@log.EntryId"
+                                        data-original-notes="@log.DoctorsNotes">
+                                    <i class="bi bi-pencil"></i> Add Notes
+                                </button>
+                            </div>
+
+                            <!-- Display current notes -->
+                            <div id="@(trackerType)-doctors-notes-display-@log.EntryId" class="@(trackerType)-doctors-notes-display">
+                                @if (!string.IsNullOrEmpty(log.DoctorsNotes))
+                                {
+                                    <div class="notes-content bg-light p-3 rounded">
+                                        <p class="mb-0 text-theme-clr-main-dark">@log.DoctorsNotes</p>
+                                        <small class="text-muted fs-10">
+                                            @if (log.DoctorResponseTime.HasValue)
+                                            {
+                                                <text>Last updated: @log.DoctorResponseTime.Value.ToString("dd MMM yyyy HH:mm")</text>
+                                            }
+                                            else
+                                            {
+                                                <text>No update time recorded</text>
+                                            }
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted fst-italic">
+                                        <i class="bi bi-info-circle"></i> No notes yet
+                                    </div>
+                                }
+                            </div>
+                            
+                            @{
+                                var editorId = $"notes-textarea-{trackerType}-{log.EntryId}";
+                             }
+                            <!-- Edit notes section (hidden by default) -->
+                            <div id="@(trackerType)-doctors-notes-edit-@(trackerType)-@log.EntryId" class="@(trackerType)-doctors-notes-edit d-none">
+                                <textarea class="form-control notes-textarea"
+                                  id="@editorId"
+                                  rows="3"
+                                  placeholder="Enter doctor's notes here...">@log.DoctorsNotes</textarea>
+                                <div class="mt-2 d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-outline-secondary @(trackerType)-@(trackerType)-cancel-edit-btn"
+                                            data-log-id="@log.EntryId">
+                                        Cancel
+                                    </button>
+                                    <button class="btn btn-sm btn-primary @(trackerType)-@(trackerType)-save-notes-btn " onclick="SaveDoctorNotesPregnancy('@log.PregnancyTrackerLogId', '@log.EntryId','@editorId')">
+                                        <i class="bi bi-check-lg"></i> Save Notes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+            <!-- Pagination Controls -->
+            <div class="pagination-controls mt-4 d-flex justify-content-between align-items-center" id="@(trackerType)-pagination-controls">
+                <div class="pagination-info">
+                    <small class="text-muted">Page <span class="current-page">1</span> of <span class="total-pages">0</span></small>
+                </div>
+                <div class="pagination-buttons">
+                    <button class="btn btn-outline-primary btn-sm me-2 @(trackerType)-newer-btn" style="display: none;">
+                        <i class="bi bi-chevron-left"></i> Newer
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm @(trackerType)-older-btn" style="display: none;">
+                        Older <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    
+</style>
+
+<script>
+
+    function navigateToPage@(trackerType.ToUpper())(page) 
+    {
+        const pageSize = 3;
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+
+        // Hide all pregnancy logs, show only current page
+        $('.@(trackerType)-log-entry').hide().slice(startIndex, endIndex).show();
+
+        updatePaginationControls@(trackerType.ToUpper())(page);
+        closeAllDetails@(trackerType.ToUpper())();
+    }
+
+
+    function updatePaginationControls@(trackerType.ToUpper())(currentPage) {
+        const totalLogs = $('.@(trackerType)-log-entry').length;
+        const pageSize = 3;
+        const totalPages = Math.ceil(totalLogs / pageSize);
+
+        // Update displayed text
+        const start = ((currentPage - 1) * pageSize) + 1;
+        const end = Math.min(currentPage * pageSize, totalLogs);
+        $('#@(trackerType)-pagination-info small').text(`Showing ${start}-${end} of ${totalLogs} logs`);
+        $('#@(trackerType)-pagination-controls .current-page').text(currentPage);
+        $('#@(trackerType)-pagination-controls .total-pages').text(totalPages);
+
+        // Update buttons
+        $('.@(trackerType)-newer-btn').toggle(currentPage > 1);
+        $('.@(trackerType)-older-btn').toggle(currentPage < totalPages);
+    }
+
+    function closeAllDetails@(trackerType.ToUpper())() {
+        $('[id^="log-details-preg-"]').addClass('d-none');
+        $('.@(trackerType)-toggle-details-btn i').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+    }
+
+    // Event handlers with jQuery
+    $(document).ready(function() {
+        // Pregnancy pagination button clicks
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-newer-btn', function() {
+            const currentPage = parseInt($('#@(trackerType)-pagination-controls .current-page').text());
+            navigateToPage@(trackerType.ToUpper())(currentPage - 1);
+        });
+
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-older-btn', function() {
+            const currentPage = parseInt($('#@(trackerType)-pagination-controls .current-page').text());
+            navigateToPage@(trackerType.ToUpper())(currentPage + 1);
+        });
+
+        // Pregnancy toggle details
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-toggle-details-btn', function() {
+            const $btn = $(this);
+            const logId = $btn.data('log-id');
+            const $details = $('#log-details-preg-' + logId);
+            const $icon = $btn.find('i');
+
+            $details.toggleClass('d-none');
+            $icon.toggleClass('bi-chevron-down bi-chevron-up');
+        });
+
+        // Initialize pregnancy tracker
+        navigateToPage@(trackerType.ToUpper())(1);
+        initializeDoctorsNotes@(trackerType.ToUpper())();
+
+    });
+
+        // Doctors Notes functionality
+    function initializeDoctorsNotes@(trackerType.ToUpper())() {
+        // Edit notes button click
+        $('#@(trackerType)-card-body').on('click', '.@(trackerType)-edit-notes-btn', function() {
+            const logId = $(this).data('log-id');
+            const originalNotes = $(this).data('original-notes') || '';
+
+            // Show edit section, hide display section
+            $('#@(trackerType)-doctors-notes-display-' + logId).hide();
+            $('#@(trackerType)-doctors-notes-edit-' + logId).removeClass('d-none');
+
+            // Focus the textarea
+            $('#notes-textarea-' + logId).focus();
+        });
+
+        // Cancel edit button click
+        $('.card-body').on('click', '.@(trackerType)-cancel-edit-btn', function() {
+            const logId = $(this).data('log-id');
+            const originalNotes = $('.@(trackerType)-edit-notes-btn[data-log-id="' + logId + '"]').data('original-notes') || '';
+
+            // Reset textarea to original value
+            $('#notes-textarea-' + logId).val(originalNotes);
+
+            // Show display section, hide edit section
+            $('#@(trackerType)-doctors-notes-edit-' + logId).addClass('d-none');
+            $('#@(trackerType)-doctors-notes-display-' + logId).show();
+
+            // Hide save button
+            $('.@(trackerType)-save-notes-btn[data-log-id="' + logId + '"]').addClass('d-none');
+        });
+
+        // Textarea input change
+        $('.card-body').on('input', '.notes-textarea', function() {
+            const logId = $(this).attr('id').replace('notes-textarea-', '');
+            const currentValue = $(this).val();
+            const originalNotes = $('.@(trackerType)-edit-notes-btn[data-log-id="' + logId + '"]').data('original-notes') || '';
+
+            // Show/hide save button based on changes
+            const saveBtn = $('.@(trackerType)-save-notes-btn[data-log-id="' + logId + '"]');
+            if (currentValue !== originalNotes) {
+                saveBtn.removeClass('d-none');
+            } else {
+                saveBtn.addClass('d-none');
+            }
+        });
+
+    }
+
+    function updateDoctorsNotesUI(logId, notes) {
+        // Update the display section
+        const displaySection = $('#@(trackerType)-doctors-notes-display-' + logId);
+
+        if (notes) {
+            displaySection.html(`
+                <div class="notes-content bg-light p-3 rounded">
+                    <p class="mb-0">${notes}</p>
+                    <small class="text-muted">Last updated: Just now</small>
+                </div>
+            `);
+        } else {
+            displaySection.html(`
+                <div class="text-muted fst-italic">
+                    <i class="bi bi-info-circle"></i> No notes yet
+                </div>
+            `);
+        }
+
+        // Update the edit button data
+        $('.@(trackerType)-edit-notes-btn[data-log-id="' + logId + '"]').data('original-notes', notes);
+
+        // Hide edit section, show display section
+        $('#@(trackerType)-doctors-notes-edit-' + logId).addClass('d-none');
+        displaySection.show();
+
+        // Hide save button
+        $('.@(trackerType)-save-notes-btn[data-log-id="' + logId + '"]').addClass('d-none');
+    }
+
+    function showToast(message, type = 'info') {
+        // Simple toast notification - you can replace with your preferred notification system
+        const toast = $(`
+            <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `);
+
+        $('body').append(toast);
+        const bsToast = new bootstrap.Toast(toast[0]);
+        bsToast.show();
+
+        // Remove toast after hide
+        toast.on('hidden.bs.toast', function() {
+            $(this).remove();
+        });
+    }
+
+
+    function SaveDoctorNotesPregnancy(moduleLogId, entryId, notesEditorId)
+    {
+        ShowAlertModal(
+             'Add Notes for this day?',
+             `Are you sure you want to Submit notes to patient? The patient will be notified about this immediately.`,
+             '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            var url = "@Url.Action("UpdateModuleLogDoctorsNotes", "Doctor")";
+
+            var payload =
+            {
+                ModuleType: '@ModuleType.Pregnancy',
+                PatientUserId: '@patientUserId',
+                ModuleLogId: moduleLogId,
+				EntryId: entryId,
+                Notes: $(`#${notesEditorId}`).val()
+            };
+
+            ShowAppLoader("Sending notes to patient...");
+
+            PerformAction(url, "POST", payload, PregnancyNotesCallback);
+        });
+    }
+
+    function PregnancyNotesCallback(success, response)
+    {
+        if (success)
+        {
+            HideAppLoader();
+
+            ShowAlertModal(
+                'Notes saved',
+                `Your notes for the day have been saved and sent to user`,
+                '@AlertModalIconType.Information').then(function (confirmed)
+            {
+                ForceHardReloadNow();
+            });
+        }
+        else
+        {
+            HideAppLoader();
+            ShowAlertModal('Not Saved', `Something went wrong, please try again later`, '@AlertModalIconType.Error');
+        }
+    }
+
+</script>

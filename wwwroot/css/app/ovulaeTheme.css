@@ -1,0 +1,157 @@
+﻿:root
+{
+    --theme-clr-main: #b5a4de;
+    --theme-clr-main-dark: #9d8acb;
+    --theme-clr-2: #cb6ce6;
+    --theme-clr-light: #fff5ff;
+    --theme-clr-light-2: #ffdafa;
+    --theme-clr-3: #4506dd;
+    --theme-clr-purple: #dde3ff;
+    --theme-gray: #dadada;
+    --theme-gray-2: #828282;
+    --theme-light-gray: #eeeeee;
+}
+
+/*=============== Dashboard ================*/
+
+.app-sidebar
+{
+    background: red !important;
+}
+
+/*=============== Color ================*/
+.text-ov-main, .text-theme-clr-main
+{
+    color: var(--theme-clr-main) !important;
+}
+.text-theme-clr-main-dark
+{
+    color: var(--theme-clr-main-dark) !important;
+}
+.text-ov-second, .text-theme-clr-2
+{
+    color: var(--theme-clr-2) !important;
+}
+.text-theme-clr-3
+{
+    color: var(--theme-clr-3) !important;
+}
+.text-theme-clr-purple
+{
+    color: var(--theme-clr-purple) !important;
+}
+.text-theme-light
+{
+    color: var(--theme-clr-light) !important;
+}
+.text-theme-light-2
+{
+    color: var(--theme-clr-light-2) !important;
+}
+.text-theme-gray
+{
+    color: var(--theme-gray) !important;
+}
+.text-theme-gray-2
+{
+    color: var(--theme-gray-2) !important;
+}
+.text-theme-light-gray
+{
+    color: var(--theme-light-gray) !important;
+}
+
+/*=============== Background ================*/
+.bg-theme-clr-main
+{
+    background: var(--theme-clr-main) !important;
+}
+.bg-theme-clr-2
+{
+    background: var(--theme-clr-2) !important;
+}
+.bg-theme-clr-3
+{
+    background: var(--theme-clr-3) !important;
+}
+.bg-theme-clr-purple
+{
+    background: var(--theme-clr-purple) !important;
+}
+.bg-theme-light
+{
+    background: var(--theme-clr-light) !important;
+}
+.bg-theme-light-2
+{
+    background: var(--theme-clr-light-2) !important;
+}
+.bg-theme-gray
+{
+    background: var(--theme-gray) !important;
+}
+.bg-theme-gray-2
+{
+    background: var(--theme-gray-2) !important;
+}
+.bg-theme-light-gray
+{
+    background: var(--theme-light-gray) !important;
+}
+
+/*================================================*/
+
+.btn-theme-clr-main
+{
+    background: var(--theme-clr-main) !important;
+    color: white !important;
+    border: 1px solid var(--theme-clr-main) !important;
+}
+
+.btn-outline-theme-clr-main
+{
+    background: white !important;
+    color: var(--theme-clr-main) !important;
+    border: 1px solid var(--theme-clr-main) !important;
+}
+
+.btn-theme-clr-main:hover
+{
+    opacity: 0.6 !important;
+}
+
+.btn-outline-theme-clr-main:hover
+{
+    background: var(--theme-clr-main) !important;
+    color: white !important;
+}
+
+.btn-theme-clr-2
+{
+    background: var(--theme-clr-2) !important;
+    color: white !important;
+    border: 1px solid var(--theme-clr-2) !important;
+}
+.btn-theme-clr-2:hover
+{
+    opacity: 0.6 !important;
+}
+
+
+
+.user-premium-clr
+{
+    background: #b5a4de !important;
+}
+.user-affiliate-clr
+{
+    background: #FFC107 !important;
+}
+.user-doctor-clr
+{
+    background: #AECD34 !important;
+}
+.user-admin-clr
+{
+    background: var(--theme-clr-2) !important;
+}

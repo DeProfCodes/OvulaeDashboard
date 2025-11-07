@@ -1,0 +1,338 @@
+﻿@using OvulaeDashboard.ViewModels.Affiliate
+@model AffiliateDetailsViewModel
+
+@{
+    ViewData["Title"] = "Affiliate Details";
+
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-people-fill",
+                PageType = AppPageType.AffiliateDetails,
+            });
+
+    var width = $"{Model.MonthlyProgressPercent}%";
+    var initial = Model.UserName?.Substring(0, 1).ToUpper();
+
+    var level = $"level_{Model.CurrentLevel}.png";
+}
+
+<section class="row g-4">
+
+    <!-- Summary Strip -->
+    <div class="col-12">
+        <div class="card shadow-sm mb-2">
+            <div class="card-body d-flex justify-content-around text-center">
+                <div>
+                    <div class="text-muted fs-dynamic-normal">Total Recruited</div>
+                    <div class="fw-bold fs-dynamic-large-1">@Model.TotalRecruited</div>
+                </div>
+                <div>
+                    <div class="text-muted fs-dynamic-normal">Total Clicks</div>
+                    <div class="fw-bold fs-dynamic-large-1">@Model.TotalClicks</div>
+                </div>
+                <div>
+                    <div class="text-muted fs-dynamic-normal">Total Earned</div>
+                    <div class="fw-bold fs-dynamic-large-1 text-success">@Model.TotalEarned</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEFT COLUMN -->
+    <div class="col-lg-7">
+
+        <!-- Profile + Metrics -->
+        <div class="card">
+            <div class="card-body">
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-primary text-white fw-bold me-3 d-flex align-items-center justify-content-center"
+                    style="width: 50px; height: 50px;">
+                        @initial
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">@Model.UserName</h4>
+                        <small class="text-muted">Joined on @Model.JoinDate.ToString("dd MMM yyyy")</small>
+                    </div>
+                </div>
+
+                <h5 class="mb-3 text-primary d-flex align-items-center">
+                    <i class="bi bi-bar-chart-line me-2"></i> Performance Metrics
+                </h5>
+
+                <div class="row text-center">
+                    <div class="col-6 col-md-4 mb-3">
+                        <h6 class="text-uppercase fs-dynamic-normal text-muted">Total Recruited</h6>
+                        <p class="fw-bold fs-dynamic-large-1">@Model.TotalRecruited</p>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <h6 class="text-uppercase fs-dynamic-normal text-muted">This Month</h6>
+                        <p class="fw-bold fs-dynamic-large-1">@Model.RecruitedThisMonth</p>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <h6 class="text-uppercase fs-dynamic-normal text-muted">Clicks</h6>
+                        <p class="fw-bold fs-dynamic-large-1">@Model.TotalClicks</p>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <h6 class="text-uppercase fs-dynamic-normal text-muted">App Store Joins</h6>
+                        <div class="d-flex w-fit-content mx-auto">
+                            <img src="~/images/other_icons/apple_icon.png" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;margin-top: 6px;" />
+                            <p class="fw-bold fs-dynamic-large-1 mb-0">@Model.AppleStoreJoins</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <h6 class="text-uppercase fs-dynamic-normal text-muted">Play Store Joins</h6>
+                        <div class="w-fit-content d-flex mx-auto">
+                            <img src="~/images/other_icons/playstore.png" alt="Play Store" style="width: 20px; height: 20px; margin-right: 8px;margin-top: 6px;" />
+                            <p class="fw-bold fs-dynamic-large-1 mb-0">@Model.PlayStoreJoins</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="text-primary fw-bold mb-3 d-flex align-items-center"><i class="bi bi-currency-dollar me-2"></i> Earnings Overview</h5>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <span class="text-success fs-dynamic-normal">Total Earned</span>
+                        <p class="fw-bold fs-dynamic-large-1 text-success">@Model.TotalEarned</p>
+                    </div>
+                    <div class="col-4">
+                        <span class="text-danger fs-dynamic-normal">Withdrawn</span>
+                        <p class="fw-bold fs-dynamic-large-1 text-danger">@Model.TotalWithdrawn</p>
+                    </div>
+                    <div class="col-4">
+                        <span class="text-warning fs-dynamic-normal">Pending</span>
+                        <p class="fw-bold fs-dynamic-large-1 text-warning">@Model.TotalPending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referral Links -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="text-primary fw-bold mb-3 d-flex align-items-center"><i class="bi bi-link-45deg me-2"></i> Referral Links</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <img src="~/images/other_icons/playstore.png" alt="Google Play" style="width: 20px; height: 20px; margin-right: 8px;" />
+                            Referal Link
+                        </div>
+                        <div class="input-group mt-2">
+                            <input type="text" class="form-control" value="@Model.PlayStoreRefLink" readonly style="font-size: 13px;" />
+                            <button class="btn btn-sm btn-primary" onclick="shareLink('playstoreLink')" style="padding: 0 5px;"><i class="bi bi-share me-2 fs-12"></i>Share</button>
+                        </div>
+                    </div>
+
+                    <!-- Apple App Store Referral -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <img src="~/images/other_icons/apple_icon.png" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" />
+                            Apple App Store Referal Code
+                        </label>
+                        <div class="input-group mt-2">
+                            <input type="text" class="form-control fs-18" value="@Model.AppleStoreRefLink" readonly style="font-size: 13px;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Referals -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="text-primary fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-people-fill me-2"></i> Recent Referrals
+                </h5>
+                @if (Model.RecentReferrals?.Any() == true)
+                {
+                    <div class="app-scroll table-responsive app-datatable-default">
+                        <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">
+                            <table id="commissionsTable" class="w-100 display default-data-table align-middle table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Date</th>
+                                        <th class="text-center">Device Type</th>
+                                        <th class="text-center">Country</th>
+                                        <th class="text-center">Activity</th>
+                                        <th class="text-center">Commission</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="fs-12">
+                                    @foreach (var referal in Model.RecentReferrals.Take(3))
+                                    {
+                                        var deviceTypeImg = referal.DeviceType == MobileDeviceType.Android ? "playstore.png" : "apple_icon.png";
+
+                                        <tr>
+                                            <td class="table-td text-center">@referal.JoinDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td class="table-td text-center"><img src="~/images/other_icons/@deviceTypeImg" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" /></td>
+                                            <td class="table-td text-center">@Html.Raw(HtmlCssHelper.GetCountryAndFlagDiv(referal.CountryCode))</td>
+                                            <td class="table-td text-center">Monthly Subscription</td>
+                                            <td class="table-td text-center fw-bold text-success">@HtmlCssHelper.GetFormatedAmount(referal.Commission, "+")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No referrals yet.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="text-primary fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-graph-up-arrow me-2"></i> Link Traffic
+                </h5>
+                <div class="d-flex mt-1">
+                    @{
+                        var deviceTypeImg2 = Model.MostUsedDevice == MobileDeviceType.Android ? "playstore.png" : "apple_icon.png";
+                    }
+                    <p class="mb-1 text-muted fs-14">📱 Top Device: <strong>@Model.MostUsedDevice</strong></p>
+                    <img src="~/images/other_icons/@deviceTypeImg2" alt="App Store" style="width: 18px; height: 18px; margin-left: 6px;margin-top: 0px;" />
+                </div>
+                @if(!string.IsNullOrEmpty(Model.TopCountryCode))
+                {
+                    (var country, var code) = HtmlCssHelper.GetCountryAndFlag(Model.TopCountryCode);
+                    code = $"{code}.png";
+
+                    <div class="d-flex mt-1">
+                        <p class="mb-0 text-muted fs-14">🌍 Most Clicks From: <strong>@country</strong></p>
+                        <img src="https://flagcdn.com/16x12/@code" srcset="https://flagcdn.com/32x24/@code 2x,https://flagcdn.com/48x36/@code 3x" width="16" height="12" alt="@country" style="margin-left:7px;margin-top:5px">
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="card col-lg-5">
+        <div class="rounded py-3 px-3 h-100">
+
+            <!-- Monthly Activity -->
+            <div class="mb-4 text-center">
+                <h6 class="text-primary text-uppercase mb-1 fs-16">Monthly Activity</h6>
+                <p class="mb-1 fs-6">This Month: <strong>@Model.RecruitedThisMonth</strong> referrals out of <strong>100</strong></p>
+
+                @if (Model.IsActiveNextMonth)
+                {
+                    <span class="badge bg-success mb-2">✅ Will Stay Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-theme-clr-3 mb-2">⚠️ Needs @Model.RequiredToStayActive more</span>
+                }
+
+                <div class="progress mt-3" style="height: 8px;">
+                    <div class="progress-bar bg-theme-clr-2" role="progressbar" style="width: @width" aria-valuenow="@Model.MonthlyProgressPercent" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Affiliate Level -->
+            <div class="text-center py-3 border-top">
+                <h6 class="text-muted text-uppercase mb-1 fs-12">Affiliate Level</h6>
+                <p class="fw-semibold fs-5 mb-2">Level @Model.CurrentLevel</p>
+
+                <canvas id="levelChart" width="90" height="90" class="mx-auto"></canvas>
+
+                <p class="fs-12 mt-2 text-muted">Progress: <strong>@Model.CurrentPoints</strong> / @Model.NextLevelCount</p>
+            </div>
+
+            <!-- Extra Info & Badge -->
+            <div class="text-center mt-3 border-top pt-3">
+                <img src="~/images/affiliates/@level" alt="Level Badge" style="height: 150px;object-fit:contain" />
+                <p class="fs-13 text-muted mb-1 mt-2">
+                    🎯 Next Reward: <strong class="text-dark" data-bs-toggle="tooltip" title="Earn more to reveal your bonus!">
+                        🔒 Secret until Level @(Model.CurrentLevel + 1)
+                    </strong>
+                </p>
+                <p class="fs-12 text-muted">Only <strong>@(Model.NextLevelCount - Model.CurrentPoints)</strong> to reach Level @(Model.CurrentLevel + 1)</p>
+                <p class="fs-12 text-muted mb-0">Last referral: <strong>@(Model.LastReferralDate?.ToString("dd MMM yyyy") ?? "N/A")</strong></p>
+            </div>
+
+            <!-- CTA -->
+            <div class="alert alert-info text-center mt-4 mb-0">
+                🚀 Invite more friends to unlock <strong>Level @(Model.CurrentLevel + 1)</strong> and boost your rewards!
+            </div>
+
+            <!-- Ref Tip -->
+            <div class="border-top mt-3 pt-3">
+                <h5 class="text-primary fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-lightbulb me-2"></i> Growth Tip
+                </h5>
+                <p class="text-muted fs-14 mb-2">💡 Share your link with screenshots of the app’s features to increase trust.</p>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script>
+
+    $(document).ready(function () 
+    {
+        HideAppLoader();
+
+        const ctx = document.getElementById('levelChart').getContext('2d');
+        new Chart(ctx, 
+        {
+            type: 'doughnut',
+            data: {
+                labels: ['Progress', 'Remaining'],
+                datasets: [{
+                    data: [@Model.CurrentPoints, @(Model.NextLevelCount - Model.CurrentPoints)],
+                    backgroundColor: ['#6a5acd', '#e6e6e6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                responsive: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                animation: {
+                    animateRotate: true,
+                    duration: 1000
+                }
+            }
+        });
+    });
+
+    function shareLink(inputId)
+    {
+        var reflink = '@Model.PlayStoreRefLink';
+
+        if (navigator.share)
+        {
+            navigator.share({
+                title: 'Check out Ovulae',
+                text: `Download the Ovulae app using my referral link!`,
+                url: reflink
+            })
+            .then(function ()
+            {
+                console.log('Link shared successfully');
+            })
+            .catch(function (error)
+            {
+                console.error('Share failed:', error);
+            });
+        }
+        else
+        {
+            alert('Sharing not supported on this device. Please copy the link manually.');
+        }
+    }
+
+</script>

@@ -1,0 +1,143 @@
+﻿@model List<EarningsViewModel>
+
+@{
+    var index = 1;
+}
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-graph-up-arrow",
+                PageType = AppPageType.AllEarnings,
+            });
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="text-primary">All Earnings</h5>
+        </div>
+
+        <div class="p-0 card-body">
+            <div class="app-scroll table-responsive app-datatable-default">
+                <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">
+                    <!-- Table -->
+                    <table id="AllEarnings" class="w-100 display default-data-table align-middle table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Join Date</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Referral ID</th>
+                                <th class="text-center">Device Type</th>
+                                <th class="text-center">Country</th>
+                                <th class="text-center">Subscription</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Net Earnings</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="fs-12">
+                            @foreach (var gains in Model)
+                            {
+                                var rowCss = (index++ % 2) == 0 ? "even" : "odd";
+                                var deviceImgSrc = (index % 3 == 0 ? "apple_icon" : "playstore") + ".png";
+                                var countryCode = (index % 3 == 0) ? "us.png" : "za.png";
+                                var countryName = (index % 3 == 0) ? "United States" : "South Africa";
+                                var statusBadge = HtmlCssHelper.GetBadgeCssForStatus(StatusType.Pending);
+
+                                <tr class="@rowCss">
+                                    <td class="table-td text-center">2025-06-01</td>
+                                    <td class="text-center"><span class="badge text-light-primary">Referal</span></td>
+                                    <td class="table-td text-center">@(213*index)</td>
+                                    <td class="table-td text-center"><img src="~/images/other_icons/@deviceImgSrc" alt="App Store" style="width: 20px; height: 20px; margin-right: 8px;" /></td>
+                                    <td class="table-td text-center">
+                                        <div>
+                                            <img src="https://flagcdn.com/16x12/@countryCode" srcset="https://flagcdn.com/32x24/@countryCode 2x,https://flagcdn.com/48x36/@countryCode 3x" width="16" height="12">
+                                            <span>@countryName</span>
+                                        </div>
+                                    </td>
+                                    <td class="table-td text-center text-success">Monthly Subscription</td>
+                                    <td class="text-center"><span class="badge badge-@statusBadge">Pending</span></td>
+                                    <td class="table-td text-center">@HtmlCssHelper.GetFormatedAmount(1.25, "+")</td>
+                                    <td class="table-td text-center fw-bold">@HtmlCssHelper.GetFormatedAmount(index*1.25)</td>
+                                    <td></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var planNameFilter = "";
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        PlanNameFilterText();
+        MobileScreenUpdates();
+
+        if ($('#AllEarnings').length)
+        {
+            // Custom filter logic
+            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex)
+            {
+                if (!planNameFilter) return true;
+
+                const planNameColumnIndex = 0;
+                const planName = data[planNameColumnIndex] || "";
+                return planName.toLowerCase().includes(planNameFilter.toLowerCase());
+            });
+
+            AllEarnings = $('#AllEarnings').DataTable(
+            {
+                pagingType: 'simple_numbers',
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        previous: "Previous",
+                        next: "Next"
+                    }
+                }
+            });
+        }
+    });
+
+    function FilterAllResultsByPlanName()
+    {
+        var name= $("#FilterReturnsByName").val();
+
+        planNameFilter = name;
+        if (AllEarnings)
+        {
+            AllEarnings.draw();
+        }
+    }
+
+    $(window).on("resize", function ()
+    {
+        PlanNameFilterText();
+    });
+
+    function PlanNameFilterText()
+    {
+        if ($(window).width() <= 768)
+        {
+            $("#FilterReturnsByNameTitle").text("Plan Name:");
+        }
+        else
+        {
+            $("#FilterReturnsByNameTitle").text("Filter By Plan Name:");
+        }
+    }
+
+</script>

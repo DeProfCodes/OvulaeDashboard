@@ -1,0 +1,43 @@
+﻿@model BreadcrumbViewModel
+
+<div class="row">
+    <div class="w-fit-content">
+        <h4 class="main-title">@Model.PageType.GetDisplayDescription()</h4>
+        <ul class="app-line-breadcrumbs mb-3" id="BreadcrumBottom">
+            <li class="">
+                <a href="#" class="f-w-500">
+                    <span>
+                        <i class="metismenu-icon bi @Model.Icon"></i> @Model.PageType.GetDisplayGroupName()
+                    </span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="#" class="f-w-500">@Model.PageType.GetDisplayShortName()</a>
+            </li>
+            @if (Model.PageId > 0)
+            {
+                <li class="active">
+                    <a href="#" class="f-w-500" id="BreadcrumbLastNavText">@Model.PlanName</a>
+                </li>
+            }
+        </ul>
+    </div>
+    @if (Model.ActionButton.Page != AppPageType.None)
+    {
+        <div class="w-fit-content ms-auto">
+            <button class="btn btn-primary" id="BreadcrumBtn" onclick="OpenBreadcrumbLink()">
+                <i class="bi @Model.ActionButton.ButtonIconCss"></i><span class="ms-1" id="BreadcrumbActBtnTxt">@Model.ActionButton.ButtonText</span>
+            </button>
+        </div>
+    }
+</div>
+
+<script>
+
+    function OpenBreadcrumbLink()
+    {
+        NavigateToPage("@Model.ActionButton.Page");
+    }
+    
+
+</script>

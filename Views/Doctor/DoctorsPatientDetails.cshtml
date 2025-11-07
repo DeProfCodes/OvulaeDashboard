@@ -1,0 +1,196 @@
+﻿@using OvulaeDashboard.ViewModels.Doctor
+@using OvulaeShared.Enums.App
+@using OvulaeShared.ViewModel.Doctor
+@model PatientProfileViewModel
+
+@{
+    var user = Model.UserFullProfile.UserDetails;
+    ViewData["Title"] = "Patient Profile - " + user.Firstname + " " + user.Lastname;
+
+    var currentTracker = EnumHelper.GetEnumValueFromName<ModuleType>(Model.CurrentTracker);
+}
+
+<div class="container-fluid">
+    <!-- Patient Header -->
+    <div class="patient-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">@user.Firstname @user.Lastname</h1>
+                <p class="mb-1"><i class="bi bi-envelope"></i> @user.Email</p>
+                <p class="mb-1"><i class="bi bi-telephone"></i> @user.CountryCode @user.PhoneNumber</p>
+                <p class="mb-0"><i class="bi bi-calendar"></i> Member since @Model.UserFullProfile.UserSubscription.ActiveDate.ToString("MMM yyyy")</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="bg-white text-dark rounded p-3 d-inline-block">
+                    <h5 class="mb-1">Current Tracker</h5>
+                    <span class="badge bg-theme-clr-main text-white fs-6">@currentTracker.GetDisplayDescription()</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="metric-card bg-primary text-white">
+                <h4>@Model.PregnancyLogs.Count</h4>
+                <small>Pregnancy Logs</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card bg-info text-white">
+                <h4>@Model.PeriodLogs.Count</h4>
+                <small>Period Logs</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card bg-warning text-dark">
+                <h4>@Model.OvulationLogs.Count</h4>
+                <small>Ovulation Logs</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card bg-secondary text-white">
+                <h4>@Model.MenopauseLogs.Count</h4>
+                <small>Menopause Logs</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Health Profile -->
+    <div class="row mt-4">
+        <div class="col-12">
+            @await Html.PartialAsync("_PatientHealthProfile", Model)
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Current Tracker Logs (Prioritized) -->
+        <div class="col-12 mb-4">
+            @if (Model.CurrentTracker == ModuleType.Pregnancy.GetDisplayName())
+            {
+                @await Html.PartialAsync(
+                    "_PregnancyLogs", 
+                    new PregnancyLogsViewModel
+                    {
+                        Logs = Model.PregnancyLogs.OrderByDescending(x => x.LogDate).ToList(),
+							PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                    }
+                );
+            }
+            else if (Model.CurrentTracker == ModuleType.PeriodTracker.GetDisplayName())
+            {
+                @await Html.PartialAsync(
+                    "_PeriodLogs",
+                        new PeriodLogsViewModel
+                        {
+                            Logs = Model.PeriodLogs.OrderByDescending(x => x.LogDate).ToList(),
+                            PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                        }
+                );
+            }
+            else if (Model.CurrentTracker == ModuleType.Ovulation.GetDisplayName())
+            {
+                @await Html.PartialAsync(
+                    "_OvulationLogs",
+                    new OvulationLogsViewModel
+                    {
+                        Logs = Model.OvulationLogs.OrderByDescending(x => x.LogDate).ToList(),
+                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                    }
+                );
+            }
+            else if (Model.CurrentTracker == ModuleType.MenopauseTracker.GetDisplayName())
+            {
+                @await Html.PartialAsync(
+                    "_MenopauseLogs",
+                    new MenopauseLogsViewModel
+                    {
+                        Logs = Model.MenopauseLogs.OrderByDescending(x => x.LogDate).ToList(),
+                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                    }
+                );
+            }
+        </div>
+
+        <!-- All Other Logs -->
+        <div class="col-md-12 mb-4">
+            @if (Model.CurrentTracker != ModuleType.Pregnancy.GetDisplayName() && Model.PregnancyLogs.Any())
+            {
+                @await Html.PartialAsync(
+                    "_PregnancyLogs", 
+                    new PregnancyLogsViewModel
+                    {
+                        Logs = Model.PregnancyLogs.OrderByDescending(x => x.LogDate).ToList(),
+							PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                    }
+                );
+            }
+
+            @if (Model.CurrentTracker != ModuleType.Ovulation.GetDisplayName() && Model.OvulationLogs.Any())
+            {
+                @await Html.PartialAsync(
+                    "_OvulationLogs",
+                    new OvulationLogsViewModel
+                    {
+                        Logs = Model.OvulationLogs.OrderByDescending(x => x.LogDate).ToList(),
+                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                    }
+                );
+            }
+        </div>
+
+        <div class="col-md-12 mb-4">
+            @if (Model.CurrentTracker != ModuleType.PeriodTracker.GetDisplayName() && Model.PeriodLogs.Any())
+            {
+                @await Html.PartialAsync(
+                    "_PeriodLogs",
+                        new PeriodLogsViewModel
+                        {
+                            Logs = Model.PeriodLogs.OrderByDescending(x => x.LogDate).ToList(),
+                            PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                        }
+                );
+            }
+
+            @if (Model.CurrentTracker != ModuleType.MenopauseTracker.GetDisplayName() && Model.MenopauseLogs.Any())
+            {
+                @await Html.PartialAsync(
+                    "_MenopauseLogs",
+                    new MenopauseLogsViewModel
+                    {
+                        Logs = Model.MenopauseLogs.OrderByDescending(x => x.LogDate).ToList(),
+                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
+                    }
+                );
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+    });
+
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) 
+    {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    function toggleLogDetails(logId) 
+    {
+        const details = document.getElementById('log-details-' + logId);
+        details.classList.toggle('d-none');
+    }
+    
+    function filterLogs(module, days) 
+    {
+        console.log(`Filtering ${module} logs for ${days} days`);
+    }
+
+</script>

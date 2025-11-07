@@ -1,0 +1,152 @@
+﻿
+@model List<UserAdminDetailsViewModel>
+
+@{
+    var planNames = new List<string>();//Model.Select(x => x.PlanName).Distinct().ToList();
+    var index = 1;
+}
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-people-fill",
+                PageType = AppPageType.UsersManagement
+            });
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="text-primary">All Users</h5>
+        </div>
+
+        <div class="p-0 card-body">
+            <div class="app-scroll table-responsive app-datatable-default">
+                <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">                   
+                    <table id="AllUsers" class="w-100 display default-data-table align-middle table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th class="text-center">Fullname</th>
+                                <th class="text-center">Phone Number</th>
+                                <th class="text-center">Country</th>
+                                <th class="text-center">Join Date</th>
+                                <th class="text-center">Role</th>
+                                <th class="text-center">Account Status</th>
+                                <th class="text-center">Subscription Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="fs-12">
+                            @foreach (var user in Model)
+                            {
+                                var rowCss = (index++ % 2) == 0 ? "even" : "odd";
+                                var roleBadge = HtmlCssHelper.GetBadgeCssForRole(user.UserRole);
+                                var accountBadge = HtmlCssHelper.GetBadgeCssForAccountStatus(user.AccountStatus);
+                                
+                                <tr class="@rowCss">
+                                    <td class="table-td">@user.Email</td>
+                                    <td class="table-td text-center">@user.FullName</td>
+                                    <td class="table-td text-center">@user.PhoneNumber</td>
+                                    <td class="table-td text-center text-primary">@Html.Raw(HtmlCssHelper.GetCountryAndFlagDiv(user.CountryCode))</td>
+                                    <td class="table-td text-center">@user.JoinDate</td>
+                                    <td class="table-td text-center"><span class="badge @roleBadge">@user.UserRole.GetDisplayName()</span></td>
+                                    <td class="table-td text-center"><span class="badge text-light-@accountBadge">@user.AccountStatus.GetDisplayName()</span></td>
+                                    <td class="table-td text-center">@user.SubscriptionJoinDate</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-theme-clr-2">Edit</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Dashboard/AddOrEditUser.cshtml");
+}
+
+<script>
+
+    var planNameFilter = "";
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        PlanNameFilterText();
+        MobileScreenUpdates();
+
+        if ($('#AllUsers').length)
+        {
+            // Custom filter logic
+            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex)
+            {
+                if (!planNameFilter) return true;
+
+                const planNameColumnIndex = 0;
+                const planName = data[planNameColumnIndex] || "";
+                return planName.toLowerCase().includes(planNameFilter.toLowerCase());
+            });
+
+            AllUsersDT = $('#AllUsers').DataTable(
+            {
+                pagingType: 'simple_numbers',
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        previous: "Previous",
+                        next: "Next"
+                    }
+                }
+            });
+        }
+    });
+
+    function FilterAllResultsByPlanName()
+    {
+        var name= $("#FilterReturnsByName").val();
+
+        planNameFilter = name;
+        if (AllUsersDT)
+        {
+            AllUsersDT.draw();
+        }
+    }
+
+    $(window).on("resize", function ()
+    {
+        PlanNameFilterText();
+    });
+
+    function PlanNameFilterText()
+    {
+        if ($(window).width() <= 768)
+        {
+            $("#FilterReturnsByNameTitle").text("Plan Name:");
+        }
+        else
+        {
+            $("#FilterReturnsByNameTitle").text("Filter By Plan Name:");
+        }
+    }
+
+    function AddNewUserModal()
+    {
+        OpenUserModal("", "", "", 2, "").then(function (okay)
+        {
+            if(okay)
+            {
+
+            }
+        });
+    }
+
+</script>

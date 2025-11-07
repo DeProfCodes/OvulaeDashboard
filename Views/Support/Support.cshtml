@@ -1,0 +1,157 @@
+﻿@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-headset",
+                PageType = AppPageType.Support
+            });
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-primary">Contact Us</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6 col-xl-6">
+                        <div class="tab-contentlist">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5 class="tab-heading mb-3 text-center text-theme-clr-main">Get In Touch, Contact us</h5>
+                                </div>
+                                <div>
+                                    <p class="fst-italic text-muted fs-12 text-center">
+                                        *Send us an email and we will get back to you as soon as possible.
+                                    </p>
+                                </div>
+                                <div class="row mt-2">
+                                    <div id="SupportContactForm">
+                                        <div class="col-xl-12 mt-3">
+                                            <label for="TopUpPlanName" class="form-label fs-16 text-theme-clr-main fw-bold">Subject</label>
+                                            <input class="form-control fs-16" type="text" id="EmailSubject">
+                                            <p class="error-message fst-italic" id="EmailSubjectError"></p>
+                                        </div>
+                                        <div class="col-xl-12 mt-3">
+                                            <label for="TopUpPlanName" class="form-label fs-16 text-theme-clr-main fw-bold">Your Message</label>
+                                            <textarea class="form-control fs-16" rows="5" id="EmailMessage"></textarea>
+                                            <p class="error-message fst-italic" id="EmailMessageError"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="w-100 text-center mt-3 mb-2">
+                                    <button id="WithdrawRequestBtn" class="mt-3 btn btn-primary text-black" onclick="SendSupportEmail()">
+                                        Send Email
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- RIGHT: Contact Information -->
+                    <div class="col-lg-6 col-xl-6" id="SupportContactInfoContainer">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="text-primary" id="SupportContactTitle">Contact Information</h3>
+                                <ul class="list-unstyled mt-3">
+                                    <li class="mb-3">
+                                        <i class="bi bi-envelope-fill text-primary me-2 support-contact-icon"></i>
+                                        <a class="text-dark support-contact-info" href="mailto:support@ovulae.com">support@ovulae.com</a>
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="bi bi-envelope-fill text-primary me-2 support-contact-icon"></i>
+                                        <a class="text-dark support-contact-info" href="mailto:admin@ovulae.com">admin@ovulae.com</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Contact Info -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+    });
+
+    function ValidateEmailFields(subject, message)
+    {
+        $("#EmailSubject").removeClass("invalid-input-box");
+        $("#EmailMessage").removeClass("invalid-input-box");
+
+        $("#EmailSubjectError").text("");
+        $("#EmailMessageError").text("");
+
+        var success = true;
+
+        if(StringNullOrEmpty(subject))
+        {
+            $("#EmailSubjectError").text("*Please enter subject!");
+            $("#EmailSubject").addClass("invalid-input-box");
+            success = false;
+        }
+        if (StringNullOrEmpty(message))
+        {
+            $("#EmailMessageError").text("*Please enter message!");
+            $("#EmailMessage").addClass("invalid-input-box");
+            success = false;
+        }
+
+        return success;
+    }
+
+    function SendSupportEmail()
+    {
+        var subject = $("#EmailSubject").val();
+        var message = $("#EmailMessage").val();
+
+        ShowAlertModal(
+            'Send Support Email',
+            `Do you want to proceed to send this email?`,
+            '@AlertModalIconType.Question').then(function (confirmed)
+        {
+            if(confirmed)
+            {
+                var isValid = ValidateEmailFields(subject, message);
+
+                if(!isValid)
+                    return;
+
+                ShowAppLoader(`Sending Email...`);
+
+                var url = "@Url.Action("SendSupportEmail", "Support")";
+
+                var payload =
+                {
+                    Subject: subject,
+                    Message: message,
+                    FromPlatform: "Dashboard-Support"
+                };
+
+                PerformAction(url, "POST", payload, SupportEmailSendCallback);
+            }
+        });
+    }
+
+    function SupportEmailSendCallback(success, response)
+    {
+        HideAppLoader();
+        if (success)
+        {
+            ShowAlertModal("Email Sent", `We have received your email and will get back to you shortly.`, "@AlertModalIconType.Success").then(function(okay)
+            {
+                
+            });
+        }
+        else
+        {
+            ShowAlertModal("Error", `${response.responseJSON.error}`, "@AlertModalIconType.Error");
+        }
+    }
+
+</script>

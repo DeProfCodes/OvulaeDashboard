@@ -1,0 +1,98 @@
+﻿@using OvulaeShared.Models.Transactions
+@model List<Transaction>
+
+@{
+    var index = 1;
+}
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Breadcrumb.cshtml", new BreadcrumbViewModel
+            {
+                Icon = "bi-arrow-left-right",
+                PageType = AppPageType.AffiliateTransactions
+            });
+}
+
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="text-primary">All Transactions</h5>
+        </div>
+
+        <div class="p-0 card-body">
+            <div class="app-scroll table-responsive app-datatable-default">
+                <div id="DefaultDataTable_wrapper" class="dataTables_wrapper no-footer">
+                    <!-- Table -->
+                    <table id="AllTransactionsHistory" class="w-100 display default-data-table align-middle table">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Request Date</th>
+                                <th class="text-center">Response Date</th>
+                                <th class="text-center">Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model)
+                            {
+                                var rowCss = (index++ % 2) == 0 ? "even" : "odd";
+                                
+                                var sign = transaction.Type == TransactionType.Withdrawal ? "-" : "+";
+                                var amountCss = transaction.Type == TransactionType.Withdrawal ? "text-danger" : "text-success";
+
+                                var statusBadge = HtmlCssHelper.GetBadgeCssForStatus(transaction.Status);
+                                var transTypeBadge = HtmlCssHelper.GetBadgeCssForTransactionType(transaction.Type);
+                                var responseDate = (transaction.Status == StatusType.Paid && transaction.Type == TransactionType.Withdrawal) ?
+                                HtmlCssHelper.GetTimeZonedTime(transaction.LastUpdateDate) : "n.a";
+
+                                <tr class="@rowCss">
+                                    <td class="table-td">@transaction.Id</td>
+                                    <td class="table-td text-center"><span class="badge text-light-primary">@transaction.Type.GetDisplayDescription()</span></td>
+                                    <td class="table-td text-center fw-bold @amountCss">@HtmlCssHelper.GetFormatedAmount(transaction.Amount, sign)</td>
+                                    <td class="table-td text-center">@HtmlCssHelper.GetTimeZonedTime(transaction.CreateDate)</td>
+                                    <td class="table-td text-center">@responseDate</td>
+                                    <td class="table-td text-center"><span class="badge badge-@statusBadge">@transaction.Status.GetDisplayShortName()</span></td>
+                                    <td>
+                                        
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("~/Views/Components/Dashboard/EditBankDetailsModal.cshtml");
+}
+
+<script>
+
+    $(document).ready(function ()
+    {
+        HideAppLoader();
+        MobileScreenUpdates();
+
+        $('#AllTransactionsHistory').DataTable({
+            pagingType: 'simple_numbers',
+            lengthMenu: [10, 25, 50, 100], // Matches your options
+            order: [], // 🔥 disables default sort
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                paginate: {
+                    previous: "Previous",
+                    next: "Next"
+                }
+            }
+        });
+    });
+
+</script>
