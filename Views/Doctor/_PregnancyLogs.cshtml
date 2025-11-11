@@ -234,7 +234,7 @@
                                 <h6 class="mb-0">
                                     <i class="bi bi-clipboard-plus text-primary"></i> Doctor's Notes
                                 </h6>
-                                <button class="btn btn-sm btn-outline-secondary @(trackerType)-@(trackerType)-edit-notes-btn"
+                                <button class="btn btn-sm btn-outline-secondary @(trackerType)-edit-notes-btn"
                                         data-log-id="@log.EntryId"
                                         data-original-notes="@log.DoctorsNotes">
                                     <i class="bi bi-pencil"></i> Add Notes
@@ -271,17 +271,17 @@
                                 var editorId = $"notes-textarea-{trackerType}-{log.EntryId}";
                              }
                             <!-- Edit notes section (hidden by default) -->
-                            <div id="@(trackerType)-doctors-notes-edit-@(trackerType)-@log.EntryId" class="@(trackerType)-doctors-notes-edit d-none">
+                            <div id="@(trackerType)-doctors-notes-edit-@log.EntryId" class="@(trackerType)-doctors-notes-edit d-none">
                                 <textarea class="form-control notes-textarea"
                                   id="@editorId"
                                   rows="3"
                                   placeholder="Enter doctor's notes here...">@log.DoctorsNotes</textarea>
                                 <div class="mt-2 d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-outline-secondary @(trackerType)-@(trackerType)-cancel-edit-btn"
+                                    <button class="btn btn-sm btn-outline-secondary @(trackerType)-cancel-edit-btn"
                                             data-log-id="@log.EntryId">
                                         Cancel
                                     </button>
-                                    <button class="btn btn-sm btn-primary @(trackerType)-@(trackerType)-save-notes-btn " onclick="SaveDoctorNotesPregnancy('@log.PregnancyTrackerLogId', '@log.EntryId','@editorId')">
+                                    <button class="btn btn-sm btn-primary @(trackerType)-save-notes-btn " onclick="SaveDoctorNotesPregnancy('@log.PregnancyTrackerLogId', '@log.EntryId','@editorId')">
                                         <i class="bi bi-check-lg"></i> Save Notes
                                     </button>
                                 </div>
