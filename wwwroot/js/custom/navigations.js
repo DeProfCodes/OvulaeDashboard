@@ -77,7 +77,7 @@ function LoadPartialViewWithLoader(url, destinationDiv, loaderDiv)
         },
         error: function (res)
         {
-            toastr.error("Error");
+            //toastr.error("Error");
             $(loaderDiv).css("visibility", "hidden");
             $(destinationDiv).css("opacity", "1");
         }

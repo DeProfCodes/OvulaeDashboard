@@ -242,6 +242,170 @@ ul.footer-nav li .w-fit-content
     margin-bottom: 5px;
 }
 
+/* Add to your existing CSS */
+.chart-container
+{
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.metric-summary
+{
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid #dee2e6;
+}
+
+.metric-summary:hover
+{
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.period-btn.active
+{
+    background-color: rgba(255,255,255,0.2) !important;
+    border-color: white !important;
+}
+
+.tracker-section
+{
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.tracker-header
+{
+    background-color: #f8f9fa;
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.tracker-header:hover
+{
+    background-color: #e9ecef;
+}
+
+.tracker-header.collapsed .bi-chevron-right
+{
+    display: inline-block;
+}
+
+.tracker-header:not(.collapsed) .bi-chevron-right
+{
+    display: none;
+}
+
+.tracker-header .bi-chevron-down
+{
+    transition: transform 0.3s;
+}
+
+.tracker-header.collapsed .bi-chevron-down
+{
+    transform: rotate(-90deg);
+}
+
+.tracker-content
+{
+    padding: 0;
+    transition: max-height 0.3s ease;
+}
+
+.tracker-content.show
+{
+    max-height: none;
+    padding: 1rem;
+}
+
+.tracker-content.collapse:not(.show)
+{
+    display: none;
+}
+
+.date-group
+{
+    margin-bottom: 2rem;
+}
+
+.date-group-header
+{
+    background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.date-group-header h6
+{
+    margin: 0;
+    font-weight: 600;
+}
+
+.log-card
+{
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    transition: box-shadow 0.2s;
+}
+
+.log-card:hover
+{
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.log-date
+{
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.log-tracker
+{
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.no-logs-message
+{
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.tracker-badge
+{
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px)
+{
+    .chart-container
+    {
+        height: 350px !important;
+    }
+
+    .metric-summary .display-6
+    {
+        font-size: 1.5rem;
+    }
+}
+
 @media screen and (max-width:1800px)
 {
     .plan-action-card

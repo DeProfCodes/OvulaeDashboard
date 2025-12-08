@@ -116,6 +116,7 @@
     
     <!-- CDNs -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/lib/datatables/datatables.min.js"></script>
 
     <script src="~/js/custom/customAjax.js"></script>
@@ -158,6 +159,19 @@
 
         let ReturnsChartInstance;
         let conversionChartInstance;
+
+        let patientTrendsChart = null;
+        let currentPeriod = 'week';
+        let currentMetric = 'mood';
+        let currentGraphType = 'line';
+        let currentDateRange = {
+            start: new Date().toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0]
+        };
+
+        let allLogsData = null;
+        let currentFilteredLogs = null;
+        let currentDateRange = null;
 
         if ('serviceWorker' in navigator) 
         {

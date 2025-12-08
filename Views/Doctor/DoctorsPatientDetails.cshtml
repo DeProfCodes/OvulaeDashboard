@@ -8,6 +8,30 @@
     ViewData["Title"] = "Patient Profile - " + user.Firstname + " " + user.Lastname;
 
     var currentTracker = EnumHelper.GetEnumValueFromName<ModuleType>(Model.CurrentTracker);
+
+    var pregnancyViewModel = new PregnancyLogsViewModel
+    {
+        PatientUserId = Model.UserFullProfile.UserDetails.UserId,
+        Logs = Model.PregnancyLogs
+    };
+
+    var periodViewModel = new PeriodLogsViewModel
+    {
+        PatientUserId = Model.UserFullProfile.UserDetails.UserId,
+        Logs = Model.PeriodLogs
+    };
+
+    var ovulationViewModel = new OvulationLogsViewModel
+    {
+        PatientUserId = Model.UserFullProfile.UserDetails.UserId,
+        Logs = Model.OvulationLogs
+    };
+
+    var menopauseViewModel = new MenopauseLogsViewModel
+    {
+        PatientUserId = Model.UserFullProfile.UserDetails.UserId,
+        Logs = Model.MenopauseLogs
+    };
 }
 
 <div class="container-fluid">
@@ -64,133 +88,915 @@
         </div>
     </div>
 
-    <div class="row">
-        <!-- Current Tracker Logs (Prioritized) -->
-        <div class="col-12 mb-4">
-            @if (Model.CurrentTracker == ModuleType.Pregnancy.GetDisplayName())
-            {
-                @await Html.PartialAsync(
-                    "_PregnancyLogs", 
-                    new PregnancyLogsViewModel
-                    {
-                        Logs = Model.PregnancyLogs.OrderByDescending(x => x.LogDate).ToList(),
-							PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                    }
-                );
-            }
-            else if (Model.CurrentTracker == ModuleType.PeriodTracker.GetDisplayName())
-            {
-                @await Html.PartialAsync(
-                    "_PeriodLogs",
-                        new PeriodLogsViewModel
-                        {
-                            Logs = Model.PeriodLogs.OrderByDescending(x => x.LogDate).ToList(),
-                            PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                        }
-                );
-            }
-            else if (Model.CurrentTracker == ModuleType.Ovulation.GetDisplayName())
-            {
-                @await Html.PartialAsync(
-                    "_OvulationLogs",
-                    new OvulationLogsViewModel
-                    {
-                        Logs = Model.OvulationLogs.OrderByDescending(x => x.LogDate).ToList(),
-                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                    }
-                );
-            }
-            else if (Model.CurrentTracker == ModuleType.MenopauseTracker.GetDisplayName())
-            {
-                @await Html.PartialAsync(
-                    "_MenopauseLogs",
-                    new MenopauseLogsViewModel
-                    {
-                        Logs = Model.MenopauseLogs.OrderByDescending(x => x.LogDate).ToList(),
-                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                    }
-                );
-            }
-        </div>
+    <!-- Patient Log Trends Graph -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white"><i class="bi bi-graph-up"></i> Patient Health Trends</h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-light active" data-period="week">Weekly</button>
+                        <button type="button" class="btn btn-sm btn-outline-light" data-period="month">Monthly</button>
+                        <button type="button" class="btn btn-sm btn-outline-light" data-period="year">Yearly</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Date Range & Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" id="trends-start-date" class="form-control" value="@Model.FilterStartDate.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" id="trends-end-date" class="form-control"
+                                   value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tracker Type</label>
+                            <select class="form-select" id="tracker-type-filter">
+                                <option value="pregnancy">Pregnancy</option>
+                                <option value="period">Period</option>
+                                <option value="ovulation">Ovulation</option>
+                                <option value="menopause">Menopause</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="applyTrackerFilter()">
+                                <i class="fas fa-filter me-2"></i>Apply Filter
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Quick Filter Buttons (Optional) -->
+                    <div class="row mb-3 hidden">
+                        <div class="col-12">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="setDateRange('7days')">
+                                    Last 7 Days
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setDateRange('30days')">
+                                    Last 30 Days
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setDateRange('90days')">
+                                    Last 90 Days
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setDateRange('thismonth')">
+                                    This Month
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="setDateRange('alltime')">
+                                    All Time
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- All Other Logs -->
-        <div class="col-md-12 mb-4">
-            @if (Model.CurrentTracker != ModuleType.Pregnancy.GetDisplayName() && Model.PregnancyLogs.Any())
-            {
-                @await Html.PartialAsync(
-                    "_PregnancyLogs", 
-                    new PregnancyLogsViewModel
-                    {
-                        Logs = Model.PregnancyLogs.OrderByDescending(x => x.LogDate).ToList(),
-							PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                    }
-                );
-            }
+                    <!-- Graph Type Selector -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Metric to Visualize</label>
+                            <select class="form-select" id="metric-select">
+                                <option value="mood">Mood</option>
+                                <option value="energy">Energy</option>
+                                <option value="sleep">Sleep Quality</option>
+                                <option value="symptoms">Symptoms</option>
+                                <option value="stress">Stress Level</option>
+                                <option value="appetite">Appetite</option>
+                                <option value="all">All Metrics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Graph Type</label>
+                            <select class="form-select" id="graph-type">
+                                <option value="line">Line Chart (Trends)</option>
+                                <option value="bar">Bar Chart (Comparison)</option>
+                                <option value="radar">Radar Chart (Patterns)</option>
+                            </select>
+                        </div>
+                    </div>
 
-            @if (Model.CurrentTracker != ModuleType.Ovulation.GetDisplayName() && Model.OvulationLogs.Any())
-            {
-                @await Html.PartialAsync(
-                    "_OvulationLogs",
-                    new OvulationLogsViewModel
-                    {
-                        Logs = Model.OvulationLogs.OrderByDescending(x => x.LogDate).ToList(),
-                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                    }
-                );
-            }
-        </div>
+                    <!-- Graph Container -->
+                    <div class="chart-container" style="height: 500px; position: relative;">
+                        <canvas id="patientTrendsChart"></canvas>
+                        <div id="chart-loading" class="text-center" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="col-md-12 mb-4">
-            @if (Model.CurrentTracker != ModuleType.PeriodTracker.GetDisplayName() && Model.PeriodLogs.Any())
-            {
-                @await Html.PartialAsync(
-                    "_PeriodLogs",
-                        new PeriodLogsViewModel
-                        {
-                            Logs = Model.PeriodLogs.OrderByDescending(x => x.LogDate).ToList(),
-                            PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                        }
-                );
-            }
-
-            @if (Model.CurrentTracker != ModuleType.MenopauseTracker.GetDisplayName() && Model.MenopauseLogs.Any())
-            {
-                @await Html.PartialAsync(
-                    "_MenopauseLogs",
-                    new MenopauseLogsViewModel
-                    {
-                        Logs = Model.MenopauseLogs.OrderByDescending(x => x.LogDate).ToList(),
-                        PatientUserId = Model.UserFullProfile.UserDetails.UserId
-                    }
-                );
-            }
+                    <!-- Data Summary -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="metric-summary bg-light p-3 rounded text-center">
+                                <h6 class="text-muted">Avg Mood</h6>
+                                <div class="display-6 fw-bold text-primary" id="avg-mood">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-summary bg-light p-3 rounded text-center">
+                                <h6 class="text-muted">Avg Energy</h6>
+                                <div class="display-6 fw-bold text-info" id="avg-energy">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-summary bg-light p-3 rounded text-center">
+                                <h6 class="text-muted">Avg Sleep</h6>
+                                <div class="display-6 fw-bold text-warning" id="avg-sleep">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-summary bg-light p-3 rounded text-center">
+                                <h6 class="text-muted">Avg Symptoms</h6>
+                                <div class="display-6 fw-bold text-danger" id="avg-symptoms">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Logs Filter & Date Range Display -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-white"><i class="bi bi-journal-text"></i> Patient Logs</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-light" id="expand-all-logs">
+                                <i class="bi bi-arrows-expand"></i> Expand All
+                            </button>
+                            <button class="btn btn-sm btn-outline-light ms-2" id="collapse-all-logs">
+                                <i class="bi bi-arrows-collapse"></i> Collapse All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Date Range Display -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-calendar-range"></i>
+                                    <span id="date-range-display">Showing all logs (use filters above to refine)</span>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" id="apply-to-logs" onclick="applyTrackerFilter()">
+                                    <i class="bi bi-arrow-clockwise"></i> Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs Container -->
+                    <div id="logs-container">
+                        <!-- Current Tracker Logs (Always Expanded) -->
+                        <div class="tracker-section" id="current-tracker-section">
+                            <div class="tracker-header">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    Current Tracker: <span class="text-primary">@currentTracker.GetDisplayDescription()</span>
+                                    <span class="badge bg-primary ms-2" id="current-tracker-count">0</span>
+                                </h6>
+                            </div>
+                            <div class="tracker-content show" id="current-tracker-content" data-current-tracker="@currentTracker.ToString().ToLower()">
+                                @if (currentTracker.ToString().ToLower() == "pregnancy")
+                                {
+                                    @await Html.PartialAsync("_PregnancyLogs", pregnancyViewModel)
+                                }
+                                else if (currentTracker.ToString().ToLower() == "periodtracker")
+                                {
+                                    @await Html.PartialAsync("_PeriodLogs", periodViewModel)
+                                }
+                                else if (currentTracker.ToString().ToLower() == "ovulation")
+                                {
+                                    @await Html.PartialAsync("_OvulationLogs", ovulationViewModel)
+                                }
+                                else if (currentTracker.ToString().ToLower() == "menopausetracker")
+                                {
+                                    @await Html.PartialAsync("_MenopauseLogs", menopauseViewModel)
+                                }
+                                else
+                                {
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span class="ms-2">Loading current tracker logs...</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Other Trackers (Collapsed by Default) -->
+                        <div class="tracker-section" id="other-trackers-section">
+                            <div class="tracker-header collapsed" data-bs-toggle="collapse" data-bs-target="#other-trackers-content">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-chevron-right"></i>
+                                    Other Trackers
+                                    <span class="badge bg-secondary ms-2" id="other-trackers-count">0</span>
+                                </h6>
+                                <button class="btn btn-sm btn-outline-secondary expand-btn">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="tracker-content collapse" id="other-trackers-content">
+                                <!-- All other trackers rendered here -->
+                                <div id="other-trackers-list">
+                                    @if (currentTracker.ToString().ToLower() != "pregnancy" && pregnancyViewModel.Logs.Any())
+                                    {
+                                        <div class="tracker-type-section mb-4">
+                                            <div class="tracker-type-header d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0">
+                                                    <i class="bi bi-gender-female"></i>
+                                                    Pregnancy Tracker
+                                                    <span class="badge bg-primary ms-2">@pregnancyViewModel.Logs.Count logs</span>
+                                                </h6>
+                                                <button class="btn btn-sm btn-outline-secondary toggle-tracker-logs" data-tracker="pregnancy">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                </button>
+                                            </div>
+                                            <div class="tracker-type-content" id="pregnancy-content">
+                                                @await Html.PartialAsync("_PregnancyLogs", pregnancyViewModel)
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (currentTracker.ToString().ToLower() != "periodtracker" && periodViewModel.Logs.Any())
+                                    {
+                                        <div class="tracker-type-section mb-4">
+                                            <div class="tracker-type-header d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0">
+                                                    <i class="bi bi-droplet"></i>
+                                                    Period Tracker
+                                                    <span class="badge bg-info ms-2">@periodViewModel.Logs.Count logs</span>
+                                                </h6>
+                                                <button class="btn btn-sm btn-outline-secondary toggle-tracker-logs" data-tracker="period">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                </button>
+                                            </div>
+                                            <div class="tracker-type-content" id="period-content">
+                                                @await Html.PartialAsync("_PeriodLogs", periodViewModel)
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (currentTracker.ToString().ToLower() != "ovulation" && ovulationViewModel.Logs.Any())
+                                    {
+                                        <div class="tracker-type-section mb-4">
+                                            <div class="tracker-type-header d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0">
+                                                    <i class="bi bi-egg"></i>
+                                                    Ovulation Tracker
+                                                    <span class="badge bg-warning ms-2">@ovulationViewModel.Logs.Count logs</span>
+                                                </h6>
+                                                <button class="btn btn-sm btn-outline-secondary toggle-tracker-logs" data-tracker="ovulation">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                </button>
+                                            </div>
+                                            <div class="tracker-type-content" id="ovulation-content">
+                                                @await Html.PartialAsync("_OvulationLogs", ovulationViewModel)
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (currentTracker.ToString().ToLower() != "menopausetracker" && menopauseViewModel.Logs.Any())
+                                    {
+                                        <div class="tracker-type-section mb-4">
+                                            <div class="tracker-type-header d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0">
+                                                    <i class="bi bi-flower1"></i>
+                                                    Menopause Tracker
+                                                    <span class="badge bg-secondary ms-2">@menopauseViewModel.Logs.Count logs</span>
+                                                </h6>
+                                                <button class="btn btn-sm btn-outline-secondary toggle-tracker-logs" data-tracker="menopause">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                </button>
+                                            </div>
+                                            <div class="tracker-type-content" id="menopause-content">
+                                                @await Html.PartialAsync("_MenopauseLogs", menopauseViewModel)
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Hidden container with all logs data for client-side filtering -->
+<div id="all-logs-data" style="display: none;"
+     data-pregnancy-logs="@Json.Serialize(Model.PregnancyLogs)"
+     data-period-logs="@Json.Serialize(Model.PeriodLogs)"
+     data-ovulation-logs="@Json.Serialize(Model.OvulationLogs)"
+     data-menopause-logs="@Json.Serialize(Model.MenopauseLogs)"
+     data-patient-user-id="@Model.UserFullProfile.UserDetails.UserId"
+     data-current-tracker="@Model.CurrentTracker">
 </div>
 
 <script>
-    
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    // Global variables
+    currentPeriod = 'week';
+    currentMetric = 'mood';
+    currentGraphType = 'line';
+    patientTrendsChart = null;
 
-    $(document).ready(function ()
-    {
+    // Store all logs data for client-side filtering
+    allLogsData = {
+        pregnancy: [],
+        period: [],
+        ovulation: [],
+        menopause: []
+    };
+
+    // Store current date range
+    currentDateRange = {
+        start: '',
+        end: ''
+    };
+
+    $(document).ready(function () {
         HideAppLoader();
+
+        // Load all logs data from hidden container for filtering
+        loadAllLogsData();
+
+        // Initialize tracker counts
+        updateTrackerCounts();
+
+        // Initialize tracker toggle functionality
+        initializeTrackerToggles();
+
+        // Initialize graph
+        loadPatientTrends();
+
+        // Period button clicks
+        $('[data-period]').click(function() {
+            $('[data-period]').removeClass('active');
+            $(this).addClass('active');
+            currentPeriod = $(this).data('period');
+
+            // Auto-update date range based on period
+            updateDateRangeByPeriod();
+            loadPatientTrends();
+        });
+
+        // Filter changes
+        $('#trends-start-date, #trends-end-date, #tracker-type-filter, #metric-select, #graph-type').change(function() {
+            loadPatientTrends();
+        });
+
+        // Apply date range to logs button
+        $('#apply-to-logs').click(function() {
+            applyLogFilters();
+        });
+
+        // Expand all logs button
+        $('#expand-all-logs').click(function() {
+            $('.tracker-content').addClass('show');
+            $('.tracker-header').removeClass('collapsed');
+            $('.expand-btn .bi-chevron-down').css('transform', 'rotate(0deg)');
+        });
+
+        // Collapse all logs button
+        $('#collapse-all-logs').click(function() {
+            $('#other-trackers-content').removeClass('show');
+            $('#other-trackers-section .tracker-header').addClass('collapsed');
+            $('#other-trackers-section .expand-btn .bi-chevron-down').css('transform', 'rotate(-90deg)');
+        });
+
+        // Expand/collapse toggle for other trackers section
+        $('#other-trackers-section .tracker-header').click(function() {
+            $(this).toggleClass('collapsed');
+            const icon = $(this).find('.bi-chevron-down');
+            if ($(this).hasClass('collapsed')) {
+                icon.css('transform', 'rotate(-90deg)');
+            } else {
+                icon.css('transform', 'rotate(0deg)');
+            }
+        });
+
+        // Initialize date inputs max value
+        const today = new Date().toISOString().split('T')[0];
+        $('#trends-end-date').attr('max', today);
+
+        // Set default tracker type in dropdown
+        const currentTracker = $('#current-tracker-content').data('current-tracker') || '@currentTracker.ToString().ToLower()';
+        $('#tracker-type-filter').val(currentTracker);
+
+        // Initialize date range display
+        updateDateRangeDisplay();
+        SelectAnOptionWithValue("#tracker-type-filter", "@currentTracker.GetDisplayShortName().ToLower()");
+        applyTrackerFilter();
     });
 
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) 
-    {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-    
-    function toggleLogDetails(logId) 
-    {
-        const details = document.getElementById('log-details-' + logId);
-        details.classList.toggle('d-none');
-    }
-    
-    function filterLogs(module, days) 
-    {
-        console.log(`Filtering ${module} logs for ${days} days`);
+    function loadAllLogsData() {
+        try {
+            const dataContainer = $('#all-logs-data');
+
+            // Parse JSON data from data attributes
+            allLogsData.pregnancy = JSON.parse(dataContainer.data('pregnancy-logs') || '[]');
+            allLogsData.period = JSON.parse(dataContainer.data('period-logs') || '[]');
+            allLogsData.ovulation = JSON.parse(dataContainer.data('ovulation-logs') || '[]');
+            allLogsData.menopause = JSON.parse(dataContainer.data('menopause-logs') || '[]');
+
+            console.log('Loaded all logs data for filtering:', {
+                pregnancy: allLogsData.pregnancy.length,
+                period: allLogsData.period.length,
+                ovulation: allLogsData.ovulation.length,
+                menopause: allLogsData.menopause.length
+            });
+        } catch (error) {
+            console.error('Error loading logs data:', error);
+        }
     }
 
+    function updateTrackerCounts() {
+        const currentTracker = $('#all-logs-data').data('current-tracker').toLowerCase();
+        let currentCount = 0;
+        let otherCount = 0;
+
+        // Count logs for current tracker
+        switch(currentTracker) {
+            case 'pregnancy':
+                currentCount = allLogsData.pregnancy.length;
+                otherCount = allLogsData.period.length + allLogsData.ovulation.length + allLogsData.menopause.length;
+                break;
+            case 'periodtracker':
+                currentCount = allLogsData.period.length;
+                otherCount = allLogsData.pregnancy.length + allLogsData.ovulation.length + allLogsData.menopause.length;
+                break;
+            case 'ovulation':
+                currentCount = allLogsData.ovulation.length;
+                otherCount = allLogsData.pregnancy.length + allLogsData.period.length + allLogsData.menopause.length;
+                break;
+            case 'menopausetracker':
+                currentCount = allLogsData.menopause.length;
+                otherCount = allLogsData.pregnancy.length + allLogsData.period.length + allLogsData.ovulation.length;
+                break;
+        }
+
+        $('#current-tracker-count').text(currentCount);
+        $('#other-trackers-count').text(otherCount);
+    }
+
+    function initializeTrackerToggles() {
+        $('.toggle-tracker-logs').off('click').on('click', function() {
+            const tracker = $(this).data('tracker');
+            const $content = $(`#${tracker}-content`);
+            const $icon = $(this).find('i');
+
+            $content.toggle();
+            $icon.toggleClass('bi-chevron-down bi-chevron-up');
+        });
+    }
+
+    function applyLogFilters() {
+        const startDate = $('#trends-start-date').val();
+        const endDate = $('#trends-end-date').val();
+        const trackerType = $('#tracker-type-filter').val();
+
+        // Update date range display
+        updateDateRangeDisplay();
+
+        // Filter logs client-side
+        const filteredLogs = filterLogsClientSide(startDate, endDate, trackerType);
+
+        // Update UI with filtered logs
+        updateUIWithFilteredLogs(filteredLogs);
+    }
+
+    function filterLogsClientSide(startDate, endDate, trackerType) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        const filtered = {
+            pregnancy: [],
+            period: [],
+            ovulation: [],
+            menopause: []
+        };
+
+        // Helper function to check if date is in range
+        function isInDateRange(logDate) {
+            const date = new Date(logDate);
+            return date >= start && date <= end;
+        }
+
+        // Filter logs based on tracker type
+        if (trackerType === 'all' || trackerType === 'pregnancy') {
+            filtered.pregnancy = allLogsData.pregnancy.filter(log => isInDateRange(log.logDate));
+        }
+
+        if (trackerType === 'all' || trackerType === 'period') {
+            filtered.period = allLogsData.period.filter(log => isInDateRange(log.logDate));
+        }
+
+        if (trackerType === 'all' || trackerType === 'ovulation') {
+            filtered.ovulation = allLogsData.ovulation.filter(log => isInDateRange(log.logDate));
+        }
+
+        if (trackerType === 'all' || trackerType === 'menopause') {
+            filtered.menopause = allLogsData.menopause.filter(log => isInDateRange(log.logDate));
+        }
+
+        return filtered;
+    }
+
+    function updateUIWithFilteredLogs(filteredLogs) {
+        // For now, we'll just show/hide tracker sections based on whether they have logs
+        // In a more advanced implementation, you could re-render the partial views
+
+        $('.tracker-type-section').each(function() {
+            const trackerType = $(this).find('.toggle-tracker-logs').data('tracker');
+            const hasLogs = filteredLogs[trackerType] && filteredLogs[trackerType].length > 0;
+
+            if (hasLogs) {
+                $(this).show();
+                // Update count badge
+                $(this).find('.badge').text(filteredLogs[trackerType].length + ' logs');
+            } else {
+                $(this).hide();
+            }
+        });
+
+        // Update counts
+        const totalFiltered = Object.values(filteredLogs).reduce((sum, logs) => sum + logs.length, 0);
+        $('#current-tracker-count').text(totalFiltered);
+        $('#other-trackers-count').text($('.tracker-type-section:visible').length);
+    }
+
+    function updateDateRangeByPeriod() {
+        const endDate = new Date();
+        let startDate = new Date();
+
+        switch(currentPeriod) {
+            case 'week':
+                startDate.setDate(endDate.getDate() - 7);
+                break;
+            case 'month':
+                startDate.setMonth(endDate.getMonth() - 1);
+                break;
+            case 'year':
+                startDate.setFullYear(endDate.getFullYear() - 1);
+                break;
+        }
+
+        $('#trends-start-date').val(startDate.toISOString().split('T')[0]);
+        $('#trends-end-date').val(endDate.toISOString().split('T')[0]);
+
+        currentDateRange.start = startDate.toISOString().split('T')[0];
+        currentDateRange.end = endDate.toISOString().split('T')[0];
+
+        updateDateRangeDisplay();
+    }
+
+    function updateDateRangeDisplay() {
+        const start = $('#trends-start-date').val();
+        const end = $('#trends-end-date').val();
+
+        if (start && end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const formattedStart = startDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const formattedEnd = endDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            $('#date-range-display').html(`
+                <strong>Showing logs from ${formattedStart} to ${formattedEnd}</strong>
+                <span class="ms-2 badge bg-primary">Filter Applied</span>
+            `);
+        } else {
+            $('#date-range-display').html(`
+                <strong>Showing all logs</strong>
+                <span class="ms-2 badge bg-secondary">No Date Filter</span>
+            `);
+        }
+    }
+
+    /**
+     * Main filter function that gets called when "Apply Filter" is clicked
+     */
+    function applyTrackerFilter() {
+        const startDate = $('#trends-start-date').val();
+        const endDate = $('#trends-end-date').val();
+        const selectedTracker = $('#tracker-type-filter').val();
+
+        // Validation
+        if (!startDate || !endDate) {
+            toastr.warning('Please select both start and end dates');
+            return;
+        }
+
+        if (new Date(startDate) > new Date(endDate)) {
+            toastr.error('Start date cannot be after end date');
+            return;
+        }
+
+        // If "all" is selected, we need to handle differently
+        if (selectedTracker === 'all') {
+            // Option 1: Show first tracker by default
+            loadTrackerPartial('pregnancy', startDate, endDate);
+            // Option 2: Show all trackers in different sections (if your design supports it)
+            // loadAllTrackers(startDate, endDate);
+        } else {
+            loadTrackerPartial(selectedTracker, startDate, endDate);
+        }
+    }
+
+    /**
+     * Loads a specific tracker partial with date filtering
+     */
+    function loadTrackerPartial(trackerType, startDate, endDate) {
+        // Fix tracker type mapping - make sure it matches your controller
+        let controllerTrackerType = trackerType;
+        if (trackerType === 'period') {
+            controllerTrackerType = 'periodtracker';
+        } else if (trackerType === 'menopause') {
+            controllerTrackerType = 'menopausetracker';
+        }
+
+        const patientUserId = $('#all-logs-data').data('patient-user-id');
+        const url = '/Doctor/GetFilteredTrackerLogs' +
+                    `?trackerType=${encodeURIComponent(controllerTrackerType)}` +
+                    `&patientUserId=${encodeURIComponent(patientUserId)}` +
+                    `&startDate=${encodeURIComponent(startDate)}` +
+                    `&endDate=${encodeURIComponent(endDate)}`;
+
+        // Update the current tracker in the data attribute
+        $('#current-tracker-content').data('current-tracker', trackerType);
+
+        // Show loading
+        const container = $('#current-tracker-content');
+        const originalContent = container.html();
+        container.html(`
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-2">Loading filtered logs...</div>
+            </div>
+        `);
+
+        // Use your existing LoadPartialView function
+        LoadPartialViewWithLoader(
+            url,
+            "#current-tracker-content",
+            "#MainPageLoaderImage" // Use your actual loader div ID
+        );
+    }
+
+    /**
+     * Sets quick date ranges
+     */
+    function setDateRange(rangeType) {
+        const today = new Date();
+        let startDate = new Date();
+
+        switch(rangeType) {
+            case '7days':
+                startDate.setDate(today.getDate() - 7);
+                break;
+            case '30days':
+                startDate.setDate(today.getDate() - 30);
+                break;
+            case '90days':
+                startDate.setDate(today.getDate() - 90);
+                break;
+            case 'thismonth':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                break;
+            case 'alltime':
+                startDate = new Date(2000, 0, 1); // Very old date
+                break;
+        }
+
+        // Update date inputs
+        $('#trends-start-date').val(formatDateForInput(startDate));
+        $('#trends-end-date').val(formatDateForInput(today));
+
+        // Auto-apply filter
+        applyTrackerFilter();
+    }
+
+    /**
+     * Format date for HTML input (yyyy-MM-dd)
+     */
+    function formatDateForInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function loadPatientTrends() {
+        const startDate = $('#trends-start-date').val();
+        const endDate = $('#trends-end-date').val();
+        const trackerType = $('#tracker-type-filter').val();
+        currentMetric = $('#metric-select').val();
+        currentGraphType = $('#graph-type').val();
+
+        currentDateRange.start = startDate;
+        currentDateRange.end = endDate;
+
+        updateDateRangeDisplay();
+
+        $('#chart-loading').show();
+
+        const patientUserId = $('#all-logs-data').data('patient-user-id');
+
+        // Fix the URL - make sure it matches your controller route
+        const url = `/Doctor/GetPatientTrends` +
+                   `?patientUserId=${encodeURIComponent(patientUserId)}` +
+                   `&startDate=${encodeURIComponent(startDate)}` +
+                   `&endDate=${encodeURIComponent(endDate)}` +
+                   `&period=${currentPeriod}` +
+                   `&trackerType=${trackerType}` +
+                   `&metric=${currentMetric}`;
+
+        console.log('Loading trends from:', url);
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    updateTrendsChart(response.data);
+                    updateSummaryMetrics(response.data.summary);
+                } else {
+                    showError('Failed to load trends data.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Trends AJAX error:', error);
+                showError('Network error. Please try again.');
+            },
+            complete: function() {
+                $('#chart-loading').hide();
+            }
+        });
+    }
+
+    // The rest of your chart functions remain the same
+    function updateTrendsChart(data) {
+        const ctx = document.getElementById('patientTrendsChart').getContext('2d');
+
+        if (patientTrendsChart) {
+            patientTrendsChart.destroy();
+        }
+
+        const labels = data.dataPoints.map(dp => dp.dateLabel);
+        const datasets = [];
+
+        if (currentMetric === 'all') {
+            const metricColors = {
+                mood: { bg: 'rgba(54, 162, 235, 0.2)', border: 'rgb(54, 162, 235)' },
+                energy: { bg: 'rgba(75, 192, 192, 0.2)', border: 'rgb(75, 192, 192)' },
+                sleep: { bg: 'rgba(255, 206, 86, 0.2)', border: 'rgb(255, 206, 86)' },
+                symptoms: { bg: 'rgba(255, 99, 132, 0.2)', border: 'rgb(255, 99, 132)' },
+                stress: { bg: 'rgba(153, 102, 255, 0.2)', border: 'rgb(153, 102, 255)' },
+                appetite: { bg: 'rgba(255, 159, 64, 0.2)', border: 'rgb(255, 159, 64)' }
+            };
+
+            Object.keys(metricColors).forEach(metric => {
+                const metricData = data.dataPoints.map(dp => {
+                    switch(metric) {
+                        case 'mood': return dp.moodRating || 0;
+                        case 'energy': return dp.energyRating || 0;
+                        case 'sleep': return dp.sleepRating || 0;
+                        case 'symptoms': return dp.symptomsRating || 0;
+                        case 'stress': return dp.stressRating || 0;
+                        case 'appetite': return dp.appetiteRating || 0;
+                        default: return 0;
+                    }
+                });
+
+                datasets.push({
+                    label: metric.charAt(0).toUpperCase() + metric.slice(1),
+                    data: metricData,
+                    borderColor: metricColors[metric].border,
+                    backgroundColor: metricColors[metric].bg,
+                    tension: 0.3,
+                    fill: currentGraphType === 'line'
+                });
+            });
+        } else {
+            const metricData = data.dataPoints.map(dp => {
+                switch(currentMetric) {
+                    case 'mood': return dp.moodRating || 0;
+                    case 'energy': return dp.energyRating || 0;
+                    case 'sleep': return dp.sleepRating || 0;
+                    case 'symptoms': return dp.symptomsRating || 0;
+                    case 'stress': return dp.stressRating || 0;
+                    case 'appetite': return dp.appetiteRating || 0;
+                    default: return 0;
+                }
+            });
+
+            const color = getMetricColor(currentMetric);
+            datasets.push({
+                label: currentMetric.charAt(0).toUpperCase() + currentMetric.slice(1),
+                data: metricData,
+                borderColor: color.border,
+                backgroundColor: color.bg,
+                tension: 0.3,
+                fill: currentGraphType === 'line'
+            });
+        }
+
+        const chartType = currentGraphType === 'radar' ? 'radar' :
+                         currentGraphType === 'bar' ? 'bar' : 'line';
+
+        patientTrendsChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value.toFixed(1)}/10`;
+                            },
+                            afterLabel: function(context) {
+                                const dataPoint = data.dataPoints[context.dataIndex];
+                                if (dataPoint && dataPoint.notes) {
+                                    return `Notes: ${dataPoint.notes.substring(0, 50)}...`;
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                },
+                scales: chartType !== 'radar' ? {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Rating (1-10)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: currentPeriod === 'week' ? 'Days' :
+                                  currentPeriod === 'month' ? 'Weeks' : 'Months'
+                        }
+                    }
+                } : {
+                    r: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateSummaryMetrics(summary) {
+        $('#avg-mood').text(summary.avgMood ? summary.avgMood.toFixed(1) : '-');
+        $('#avg-energy').text(summary.avgEnergy ? summary.avgEnergy.toFixed(1) : '-');
+        $('#avg-sleep').text(summary.avgSleep ? summary.avgSleep.toFixed(1) : '-');
+        $('#avg-symptoms').text(summary.avgSymptoms ? summary.avgSymptoms.toFixed(1) : '-');
+    }
+
+    function getMetricColor(metric) {
+        const colors = {
+            mood: { bg: 'rgba(54, 162, 235, 0.2)', border: 'rgb(54, 162, 235)' },
+            energy: { bg: 'rgba(75, 192, 192, 0.2)', border: 'rgb(75, 192, 192)' },
+            sleep: { bg: 'rgba(255, 206, 86, 0.2)', border: 'rgb(255, 206, 86)' },
+            symptoms: { bg: 'rgba(255, 99, 132, 0.2)', border: 'rgb(255, 99, 132)' },
+            stress: { bg: 'rgba(153, 102, 255, 0.2)', border: 'rgb(153, 102, 255)' },
+            appetite: { bg: 'rgba(255, 159, 64, 0.2)', border: 'rgb(255, 159, 64)' }
+        };
+        return colors[metric] || colors.mood;
+    }
+
+    function showError(message) {
+        console.error(message);
+        toastr.error(message);
+    }
 </script>
