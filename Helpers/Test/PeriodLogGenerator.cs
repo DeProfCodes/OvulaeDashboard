@@ -56,9 +56,9 @@ namespace OvulaeDashboard.Helpers.Test
                 PainLevel = GetPainLevel(phaseName, isBleedingDay),
 
                 // Medications
-                UsedMedication = _random.Next(0, 10) > 6, // 30% chance
-                Medications = GetRandomItems(PeriodTrackerDayLogItems.CommonMedications, 0, 2),
-                MedicationMethodNotes = GetMedicationNotes(),
+                //UsedMedication = _random.Next(0, 10) > 6, // 30% chance
+                //Medications = GetRandomItems(PeriodTrackerDayLogItems.CommonMedications, 0, 2),
+                //MedicationMethodNotes = GetMedicationNotes(),
 
                 // Daily Health & Symptoms
                 Moods = GetRandomItems(PeriodTrackerDayLogItems.Moods, 1, 3),

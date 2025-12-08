@@ -1,6 +1,7 @@
 ﻿@using OvulaeDashboard.ViewModels.Doctor
 @using OvulaeShared.Enums.App
 @using OvulaeShared.Models.Pregnancy
+@using OvulaeShared.Models.Shared.Logs
 @model PregnancyLogsViewModel
 
 @{
@@ -88,6 +89,12 @@
                                     <div class="compact-bar-title">Activities: @log.ActivitiesRating</div>
                                     <div class="compact-bar-outer">
                                         <div class="compact-bar-fill" style="width: @(log.ActivitiesRating * 10)%; background: @HtmlCssHelper.GetColorForRating(log.ActivitiesRating)"></div>
+                                    </div>
+                                </div>
+                                <div class="compact-bar-item">
+                                    <div class="compact-bar-title">Breast: @(log.BrestFeelingRating ?? 0)</div>
+                                    <div class="compact-bar-outer">
+                                        <div class="compact-bar-fill" style="width: @((log.BrestFeelingRating ?? 0) * 10)%; background: @HtmlCssHelper.GetColorForRating(log.BrestFeelingRating ?? 0);"></div>
                                     </div>
                                 </div>
                             </div>
@@ -180,6 +187,36 @@
                                         }
                                     </div>
                                 }
+
+                                @if (log.Medication.Any() || log.Vitamins.Any())
+                                {
+                                    <div class="detail-section">
+                                        <h6>Medication & Supplements</h6>
+                                        @foreach (var med in log.Medication)
+                                        {
+                                            <div class="medication-item mb-2">
+                                                @if (med is MedicationModel medicationModel)
+                                                {
+                                                    <span class="symptom-badge bg-theme-clr-main text-black">
+                                                        💊 @medicationModel.Name @(!string.IsNullOrEmpty(medicationModel.Dosage) ? $"({medicationModel.Dosage})" : "")
+                                                    </span>
+                                                }
+                                                else if (med is var medicationName)
+                                                {
+                                                    <span class="symptom-badge bg-theme-clr-main text-black">💊 @medicationName</span>
+                                                }
+                                            </div>
+                                        }
+                                        @foreach (var vitamin in log.Vitamins)
+                                        {
+                                            <span class="badge bg-warning text-dark mb-2">🌿 @vitamin</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.MedicationNotes))
+                                        {
+                                            <p class="mt-2"><small><strong>Notes:</strong> @log.MedicationNotes</small></p>
+                                        }
+                                    </div>
+                                }
                             </div>
                         </div>
 
@@ -206,7 +243,7 @@
                         </div>
 
                         <!-- Medical Alerts -->
-                        @if (log.ExperiencedBleedingOrLeakage || log.HadUnusualDiscomfort || log.UTIOften == true)
+                        @if (log.ExperiencedBleedingOrLeakage || log.HadUnusualDiscomfort || log.UTIOften == true || log.OnBloodPressureMedication == true)
                         {
                             <div class="alert alert-warning mt-3">
                                 <h6><i class="bi bi-exclamation-triangle"></i> Medical Notes</h6>
@@ -224,11 +261,49 @@
                                 {
                                     <p><strong>UTI Concern:</strong> Frequent urinary tract infections noted</p>
                                 }
+                                @if (log.OnBloodPressureMedication == true)
+                                {
+                                    <p><strong>Blood Pressure:</strong> On blood pressure medication</p>
+                                }
                             </div>
                         }
 
+                        <div class="detail-section">
+                            <h6>Physical Health</h6>
+                            <p><strong>Energy:</strong> @log.EnergyLevel</p>
+                            <p><strong>Sleep:</strong> @log.SleepQuality</p>
+                            <p><strong>Baby Movements:</strong> @log.MovementFrequency</p>
+                            <p><strong>Appetite:</strong> @log.AppetiteLevel</p>
+                            @if (log.BloodPressureDaily == true)
+                            {
+                                <p><strong>Blood Pressure:</strong> @log.BloodPressureReadings</p>
+                            }
+                            @if (!string.IsNullOrEmpty(log.WaterIntake))
+                            {
+                                <p><strong>Water Intake:</strong> @log.WaterIntake</p>
+                            }
+                            @if (!string.IsNullOrEmpty(log.NighlyUrination))
+                            {
+                                <p><strong>Nightly Urination:</strong> @log.NighlyUrination</p>
+                            }
+                        </div>
 
-                        <!-- Doctor's Notes Section -->
+                        @if (!string.IsNullOrEmpty(log.BrestFeeling))
+                        {
+                            <div class="detail-section">
+                                <h6>Breast Changes</h6>
+                                <p><strong>Feeling:</strong> @log.BrestFeeling</p>
+                                @if (log.BrestFeelingRating.HasValue && log.BrestFeelingRating > 0)
+                                {
+                                    <p><strong>Rating:</strong> @log.BrestFeelingRating/10</p>
+                                }
+                                @if (!string.IsNullOrEmpty(log.BrestFeelingNotes))
+                                {
+                                    <p><strong>Notes:</strong> @log.BrestFeelingNotes</p>
+                                }
+                            </div>
+                        }
+
                         <div class="doctors-notes-section mt-3 border-top pt-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="mb-0">
@@ -525,6 +600,24 @@
             HideAppLoader();
             ShowAlertModal('Not Saved', `Something went wrong, please try again later`, '@AlertModalIconType.Error');
         }
+    }
+
+
+    function displayMedicationItem(med)
+    {
+        if (med && med.Name) 
+        {
+            // It's a MedicationModel
+            return `<span class="symptom-badge bg-theme-clr-main text-black mb-2">
+                       💊 ${med.Name} ${med.Dosage ? `(${med.Dosage})` : ''}
+                    </span>`;
+        } 
+        else if (typeof med === 'string') 
+        {
+            // It's a string
+            return `<span class="symptom-badge bg-theme-clr-main text-black mb-2">💊 ${med}</span>`;
+        }
+        return '';
     }
 
 </script>

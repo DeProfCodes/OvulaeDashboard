@@ -3,6 +3,7 @@
 @using OvulaeShared.Helpers.CommonFunctions
 @using OvulaeShared.Models.PeriodTracker
 @using OvulaeDashboard.Helpers
+@using OvulaeShared.Models.Shared.Logs
 @model PeriodLogsViewModel
 
 @{
@@ -34,24 +35,31 @@
             foreach (var log in periodLogs.OrderByDescending(x => x.LogDate))
             {
                 <div class="log-entry @(trackerType)-log-entry">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <strong>@log.PhaseName Phase</strong>
-                            <small class="text-muted ms-2">@log.LogDate.ToString("dd MMM yyyy, dddd")</small>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge @(log.HadBleeding ? "bg-danger" : "bg-secondary")">
-                                @(log.HadBleeding ? "Bleeding" : "No Bleeding")
-                            </span>
-                            <button class="btn btn-sm btn-outline-primary @(trackerType)-toggle-details-btn" data-log-id="@log.EntryId">
-                                <i class="bi bi-chevron-down"></i>
-                            </button>
-                        </div>
-                    </div>
-
                     <!-- Minimal Bars Only -->
                     <div class="compact-2col-ratings mt-2">
                         <div class="row">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>@log.PhaseName Phase</strong>
+                                    <small class="text-muted ms-2">@log.LogDate.ToString("dd MMM yyyy, dddd")</small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge @(log.HadBleeding ? "bg-danger" : "bg-secondary")">
+                                        @(log.HadBleeding ? "Bleeding" : "No Bleeding")
+                                    </span>
+                                    @if (log.HasPcosTracking)
+                                    {
+                                        <span class="badge bg-warning text-dark" title="PCOS Tracking">PCOS</span>
+                                    }
+                                    @if (log.HasEndoTracking)
+                                    {
+                                        <span class="badge bg-danger" title="Endometriosis Tracking">Endo</span>
+                                    }
+                                    <button class="btn btn-sm btn-outline-primary @(trackerType)-toggle-details-btn" data-log-id="@log.EntryId">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <div class="col-md-6">
                                 <div class="compact-bar-item">
                                     <div class="compact-bar-title">Mood: @GetInt(log.MoodsRating)</div>
@@ -162,20 +170,88 @@
                                     }
                                 </div>
 
-                                @if (log.Medications.Any())
+                                @if (log.Medications.Any() || log.PcosMedications.Any() || log.EndoMedications.Any())
                                 {
                                     <div class="detail-section">
-                                        <h6>Medications</h6>
-                                        @foreach (var medication in log.Medications)
+                                        <h6>Medications & Treatments</h6>
+
+                                        <!-- General Medications -->
+                                        @if (log.Medications.Any())
                                         {
-                                            <span class="badge bg-light text-dark mb-2">@medication</span>
+                                            <div class="mb-2">
+                                                <strong class="text-muted">General:</strong>
+                                                @foreach (var medication in log.Medications)
+                                                {
+                                                    <div class="medication-item">
+                                                        @if (medication is MedicationModel medModel)
+                                                        {
+                                                            <span class="badge bg-info text-white mb-1">
+                                                                💊 @medModel.Name @(!string.IsNullOrEmpty(medModel.Dosage) ? $"({medModel.Dosage})" : "")
+                                                            </span>
+                                                        }
+                                                        else if (medication is var medName)
+                                                        {
+                                                            <span class="badge bg-info text-white mb-1">💊 @medName</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
                                         }
-                                        @if (!string.IsNullOrEmpty(log.MedicationMethodNotes))
+
+                                        <!-- PCOS Medications -->
+                                        @if (log.PcosMedications.Any())
                                         {
-                                            <p class="mt-1"><small>@log.MedicationMethodNotes</small></p>
+                                            <div class="mb-2">
+                                                <strong class="text-muted">PCOS:</strong>
+                                                @foreach (var medication in log.PcosMedications)
+                                                {
+                                                    <div class="medication-item">
+                                                        @if (medication is MedicationModel medModel)
+                                                        {
+                                                            <span class="badge bg-warning text-dark mb-1">
+                                                                🩺 @medModel.Name @(!string.IsNullOrEmpty(medModel.Dosage) ? $"({medModel.Dosage})" : "")
+                                                            </span>
+                                                        }
+                                                        else if (medication is var medName)
+                                                        {
+                                                            <span class="badge bg-warning text-dark mb-1">🩺 @medName</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        <!-- Endometriosis Medications -->
+                                        @if (log.EndoMedications.Any())
+                                        {
+                                            <div class="mb-2">
+                                                <strong class="text-muted">Endometriosis:</strong>
+                                                @foreach (var medication in log.EndoMedications)
+                                                {
+                                                    <div class="medication-item">
+                                                        @if (medication is MedicationModel medModel)
+                                                        {
+                                                            <span class="badge bg-danger text-white mb-1">
+                                                                🔴 @medModel.Name @(!string.IsNullOrEmpty(medModel.Dosage) ? $"({medModel.Dosage})" : "")
+                                                            </span>
+                                                        }
+                                                        else if (medication is var medName)
+                                                        {
+                                                            <span class="badge bg-danger text-white mb-1">🔴 @medName</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(log.MedicationNotes))
+                                        {
+                                            <p class="mt-1"><small><strong>Notes:</strong> @log.MedicationNotes</small></p>
                                         }
                                     </div>
                                 }
+
+
                             </div>
                             <div class="col-md-6">
                                 <div class="detail-section">
@@ -204,6 +280,133 @@
                                 }
                             </div>
                         </div>
+
+                        <!-- PCOS Tracking -->
+                        @if (log.HasPcosTracking)
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="detail-section bg-theme-clr-main">
+                                        <h6 class="text-black"><i class="bi bi-heart-pulse"></i> PCOS Tracking</h6>
+
+                                        <div class="row">
+                                            @if (log.PcosSymptoms.Any())
+                                            {
+                                                <div class="col-md-6">
+                                                    <p><strong>Symptoms:</strong></p>
+                                                    <div class="mb-2">
+                                                        @foreach (var symptom in log.PcosSymptoms)
+                                                        {
+                                                            <span class="badge bg-theme-clr-3 text-white mb-1">@symptom</span>
+                                                        }
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(log.PcosSymptomsNotes))
+                                                    {
+                                                        <p><strong>Symptom Notes:</strong> @log.PcosSymptomsNotes</p>
+                                                    }
+                                                </div>
+                                            }
+
+                                            <div class="col-md-6">
+                                                @if (log.PcosWeight > 0)
+                                                {
+                                                    <p><strong>Weight:</strong> @log.PcosWeight kg</p>
+                                                    <p><strong>Weight Date:</strong> @log.PcosWeightDate.ToString("dd MMM yyyy")</p>
+                                                }
+                                                @if (log.PcosWaistMeasurement > 0 || log.PcosHipMeasurement > 0)
+                                                {
+                                                    <p><strong>Measurements:</strong></p>
+                                                    @if (log.PcosWaistMeasurement > 0)
+                                                    {
+                                                        <p class="mb-1">Waist: @log.PcosWaistMeasurement cm</p>
+                                                    }
+                                                    @if (log.PcosHipMeasurement > 0)
+                                                    {
+                                                        <p class="mb-1">Hip: @log.PcosHipMeasurement cm</p>
+                                                    }
+                                                    @if (log.PcosWaistCircumference > 0)
+                                                    {
+                                                        <p class="mb-1">Circumference: @log.PcosWaistCircumference cm</p>
+                                                    }
+                                                }
+                                                @if (!string.IsNullOrEmpty(log.PcosWeightNotes))
+                                                {
+                                                    <p><strong>Weight Notes:</strong> @log.PcosWeightNotes</p>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(log.PcosAdditionalSymptomsNotes))
+                                        {
+                                            <div class="mt-2">
+                                                <p><strong>Additional Notes:</strong> @log.PcosAdditionalSymptomsNotes</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Endometriosis Tracking -->
+                        @if (log.HasEndoTracking)
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="detail-section bg-theme-clr-main">
+                                        <h6 class="text-black"><i class="bi bi-activity"></i> Endometriosis Tracking</h6>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                @if (log.EndoPainRating > 0)
+                                                {
+                                                    <p><strong>Pain Rating:</strong> @log.EndoPainRating/10</p>
+                                                }
+                                                @if (!string.IsNullOrEmpty(log.EndoPainComments))
+                                                {
+                                                    <p><strong>Pain Comments:</strong> @log.EndoPainComments</p>
+                                                }
+                                                @if (!string.IsNullOrEmpty(log.EndoPainLocation))
+                                                {
+                                                    <p><strong>Pain Location:</strong> @log.EndoPainLocation</p>
+                                                }
+                                                @if (!string.IsNullOrEmpty(log.EndoPainDuration))
+                                                {
+                                                    <p><strong>Pain Duration:</strong> @log.EndoPainDuration</p>
+                                                }
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                @if (log.EndoWeight > 0)
+                                                {
+                                                    <p><strong>Weight:</strong> @log.EndoWeight kg</p>
+                                                    <p><strong>Weight Date:</strong> @log.EndoWeightDate.ToString("dd MMM yyyy")</p>
+                                                }
+                                                @if (log.EndoWaistMeasurement > 0 || log.EndoHipMeasurement > 0)
+                                                {
+                                                    <p><strong>Measurements:</strong></p>
+                                                    @if (log.EndoWaistMeasurement > 0)
+                                                    {
+                                                        <p class="mb-1">Waist: @log.EndoWaistMeasurement cm</p>
+                                                    }
+                                                    @if (log.EndoHipMeasurement > 0)
+                                                    {
+                                                        <p class="mb-1">Hip: @log.EndoHipMeasurement cm</p>
+                                                    }
+                                                    @if (log.EndoWaistCircumference > 0)
+                                                    {
+                                                        <p class="mb-1">Circumference: @log.EndoWaistCircumference cm</p>
+                                                    }
+                                                }
+                                                @if (!string.IsNullOrEmpty(log.EndoWeightNotes))
+                                                {
+                                                    <p><strong>Weight Notes:</strong> @log.EndoWeightNotes</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
 
                         <!-- Lifestyle & Additional Information -->
                         <div class="row mt-2">
@@ -593,6 +796,22 @@
             HideAppLoader();
             ShowAlertModal('Not Saved', `Something went wrong, please try again later`, '@AlertModalIconType.Error');
         }
+    }
+
+    function displayMedicationItem(med) 
+    {
+        if (med && med.Name) 
+        {
+            // It's a MedicationModel
+            return `<span class="badge bg-info text-white mb-1">
+                       💊 ${med.Name} ${med.Dosage ? `(${med.Dosage})` : ''}
+                    </span>`;
+        }
+        else if (typeof med === 'string') {
+            // It's a string
+            return `<span class="badge bg-info text-white mb-1">💊 ${med}</span>`;
+        }
+        return '';
     }
 
 </script>

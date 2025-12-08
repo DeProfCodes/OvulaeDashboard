@@ -235,6 +235,13 @@ ul.footer-nav li .w-fit-content
     width: 350px !important;
 }
 
+.medication-item
+{
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
 @media screen and (max-width:1800px)
 {
     .plan-action-card

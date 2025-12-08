@@ -2,6 +2,7 @@
 @using OvulaeShared.Enums.App
 @using OvulaeShared.Helpers.CommonFunctions
 @using OvulaeShared.Models.Menopause
+@using OvulaeShared.Models.Shared.Logs
 @model MenopauseLogsViewModel
 
 @{
@@ -13,6 +14,49 @@
     int GetInt(int? value)
     {
         return DefaultValueHelper.GetIntValueOrDefault(value);
+    }
+}
+
+@functions {
+    // Calculate sleep duration (handles overnight sleep)
+    public TimeSpan CalculateSleepDuration(TimeSpan sleepTime, TimeSpan wakeTime)
+    {
+        // If wake time is earlier (e.g., slept at 10 PM, woke at 6 AM)
+        if (wakeTime < sleepTime)
+        {
+            // Crossed midnight: (24h - sleepTime) + wakeTime
+            return TimeSpan.FromHours(24) - sleepTime + wakeTime;
+        }
+        return wakeTime - sleepTime;
+    }
+
+    // Provide sleep tips for menopause
+    public string GetSleepTipsForMenopause(string sleepQuality, string hotFlashSeverity, string nightSweatSeverity)
+    {
+        var tips = new List<string>();
+
+        if (sleepQuality == "Poor" || sleepQuality == "Moderate")
+        {
+            tips.Add("Try a cool shower before bed if experiencing hot flashes");
+            tips.Add("Use moisture-wicking sleepwear and bedding");
+            tips.Add("Keep bedroom temperature between 60-67°F (15-19°C)");
+        }
+
+        if (hotFlashSeverity == "Severe" || nightSweatSeverity == "Severe")
+        {
+            tips.Add("Consider a bedside fan for night sweats");
+            tips.Add("Avoid caffeine and spicy foods close to bedtime");
+            tips.Add("Layer bedding for easy temperature adjustment");
+        }
+
+        if (sleepQuality == "Poor")
+        {
+            tips.Add("Establish a consistent sleep schedule");
+            tips.Add("Limit screen time 1 hour before bed");
+            tips.Add("Practice relaxation techniques like deep breathing");
+        }
+
+        return tips.Any() ? string.Join(" • ", tips.Take(2)) : "";
     }
 }
 
@@ -185,6 +229,12 @@
                                         }
                                         <div class="compact-bar-fill" style="width: @sleepWidth; background: @sleepColor;"></div>
                                     </div>
+                                    @if (log.SleepTime.HasValue && log.WakeTime.HasValue)
+                                    {
+                                        <small class="text-muted">
+                                            @log.SleepTime.Value.ToString(@"hh\:mm")-@log.WakeTime.Value.ToString(@"hh\:mm")
+                                        </small>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -387,6 +437,100 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Medications Section -->
+                        @if (log.Medications.Any())
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <div class="detail-section">
+                                        <h6>Medications</h6>
+                                        <div class="mb-2">
+                                            @foreach (var medication in log.Medications)
+                                            {
+                                                <div class="medication-item">
+                                                    @if (medication is MedicationModel medModel)
+                                                    {
+                                                        <span class="badge bg-info text-white mb-1">
+                                                            💊 @medModel.Name @(!string.IsNullOrEmpty(medModel.Dosage) ? $"({medModel.Dosage})" : "")
+                                                        </span>
+                                                    }
+                                                    else if (medication is var medName)
+                                                    {
+                                                        <span class="badge bg-info text-white mb-1">💊 @medName</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(log.MedicationNotes))
+                                        {
+                                            <p><strong>Medication Notes:</strong> @log.MedicationNotes</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Sleep Time Tracking -->
+                        @if (log.SleepTime.HasValue || log.WakeTime.HasValue)
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <div class="detail-section">
+                                        <h6><i class="bi bi-moon-stars"></i> Sleep Tracking</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                @if (log.SleepTime.HasValue)
+                                                {
+                                                    <p><strong>Bed Time:</strong> @log.SleepTime.Value.ToString(@"hh\:mm")</p>
+                                                }
+                                                @if (log.WakeTime.HasValue)
+                                                {
+                                                    <p><strong>Wake Time:</strong> @log.WakeTime.Value.ToString(@"hh\:mm")</p>
+                                                }
+                                                @if (log.SleepTime.HasValue && log.WakeTime.HasValue)
+                                                {
+                                                    var sleepDuration = CalculateSleepDuration(log.SleepTime.Value, log.WakeTime.Value);
+                                                    <p><strong>Sleep Duration:</strong> @sleepDuration.ToString(@"hh\:mm") hours</p>
+                                                }
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>Sleep Quality:</strong> @log.SleepQuality</p>
+                                                @if (!string.IsNullOrEmpty(log.SleepQuality) && log.SleepQuality != "Not specified")
+                                                {
+                                                    <div class="mt-2">
+                                                        @if (log.SleepQuality == "Good")
+                                                        {
+                                                            <span class="badge bg-success">😊 Good sleep</span>
+                                                        }
+                                                        else if (log.SleepQuality == "Moderate")
+                                                        {
+                                                            <span class="badge bg-warning">😐 Moderate sleep</span>
+                                                        }
+                                                        else if (log.SleepQuality == "Poor")
+                                                        {
+                                                            <span class="badge bg-danger">😣 Poor sleep</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(log.SleepQuality) && log.SleepQuality != "Not specified")
+                                        {
+                                            <div class="mt-2">
+                                                @{
+                                                    var sleepTips = GetSleepTipsForMenopause(log.SleepQuality, log.HotFlashesSeverity, log.NightSweatsSeverity);
+                                                }
+                                                @if (!string.IsNullOrEmpty(sleepTips))
+                                                {
+                                                    <p class="text-muted"><small><i class="bi bi-lightbulb"></i> @sleepTips</small></p>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
 
                         <!-- Lifestyle & Additional Information -->
                         <div class="row mt-2">
@@ -707,6 +851,23 @@
             HideAppLoader();
             ShowAlertModal('Not Saved', `Something went wrong, please try again later`, '@AlertModalIconType.Error');
         }
+    }
+
+    function displayMedicationItem(med) 
+    {
+        if (med && med.Name) 
+        {
+            // It's a MedicationModel
+            return `<span class="badge bg-info text-white mb-1">
+                       💊 ${med.Name} ${med.Dosage ? `(${med.Dosage})` : ''}
+                    </span>`;
+        } 
+        else if (typeof med === 'string') 
+        {
+            // It's a string
+            return `<span class="badge bg-info text-white mb-1">💊 ${med}</span>`;
+        }
+        return '';
     }
 
 </script>
